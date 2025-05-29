@@ -26,7 +26,7 @@ class StockAction(Component):
             ):
                 continue
             if move.state in ("partially_available", "assigned"):
-                quantity -= sum(move.move_line_ids.mapped("reserved_qty"))
+                quantity -= sum(move.move_line_ids.mapped("quantity_product_uom"))
             elif move.state in ("done"):
                 quantity -= move.product_uom_qty
         return float_round(

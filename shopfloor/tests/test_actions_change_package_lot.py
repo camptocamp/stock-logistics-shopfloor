@@ -83,7 +83,9 @@ class TestActionsChangePackageLot(CommonCase):
         self.assertRecordValues(line, [{"lot_id": new_lot.id}])
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 0, lot=initial_lot)
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=new_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=new_lot
+        )
 
     def test_change_lot_less_quantity_ok(self):
         initial_lot = self._create_lot(self.product_a)
@@ -105,14 +107,18 @@ class TestActionsChangePackageLot(CommonCase):
             # failure callback
             self.unreachable_func,
         )
-        self.assertRecordValues(line, [{"lot_id": new_lot.id, "reserved_qty": 8}])
+        self.assertRecordValues(
+            line, [{"lot_id": new_lot.id, "quantity_product_uom": 8}]
+        )
         other_line = line.move_id.move_line_ids - line
         self.assertRecordValues(
-            other_line, [{"lot_id": initial_lot.id, "reserved_qty": 2}]
+            other_line, [{"lot_id": initial_lot.id, "quantity_product_uom": 2}]
         )
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 2, lot=initial_lot)
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=new_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=new_lot
+        )
 
     def test_change_lot_zero_quant_error(self):
         """No quant in the location for the scanned lot
@@ -135,9 +141,13 @@ class TestActionsChangePackageLot(CommonCase):
             lambda move_line, message=None: self.assertEqual(message, expected_message),
         )
 
-        self.assertRecordValues(line, [{"lot_id": initial_lot.id, "reserved_qty": 10}])
+        self.assertRecordValues(
+            line, [{"lot_id": initial_lot.id, "quantity_product_uom": 10}]
+        )
         # check that reservations have not been updated
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=initial_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=initial_lot
+        )
         self.assert_quant_reserved_qty(line, lambda: 0, lot=new_lot)
 
     def test_change_lot_package_explode_ok(self):
@@ -169,7 +179,7 @@ class TestActionsChangePackageLot(CommonCase):
             [
                 {
                     "lot_id": new_lot.id,
-                    "reserved_qty": 10,
+                    "quantity_product_uom": 10,
                     "package_id": False,
                     "package_level_id": False,
                 }
@@ -178,7 +188,9 @@ class TestActionsChangePackageLot(CommonCase):
 
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 0, lot=initial_lot)
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=new_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=new_lot
+        )
 
     def test_change_lot_reserved_qty_ok(self):
         """Scan a lot already reserved by other lines
@@ -210,15 +222,21 @@ class TestActionsChangePackageLot(CommonCase):
             self.unreachable_func,
         )
 
-        self.assertRecordValues(line, [{"lot_id": new_lot.id, "reserved_qty": 10}])
+        self.assertRecordValues(
+            line, [{"lot_id": new_lot.id, "quantity_product_uom": 10}]
+        )
         # line has been re-created
         line2 = picking2.move_line_ids
-        self.assertRecordValues(line2, [{"lot_id": initial_lot.id, "reserved_qty": 10}])
+        self.assertRecordValues(
+            line2, [{"lot_id": initial_lot.id, "quantity_product_uom": 10}]
+        )
 
         # check that reservations have been updated
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=new_lot)
         self.assert_quant_reserved_qty(
-            line2, lambda: line2.reserved_qty, lot=initial_lot
+            line, lambda: line.quantity_product_uom, lot=new_lot
+        )
+        self.assert_quant_reserved_qty(
+            line2, lambda: line2.quantity_product_uom, lot=initial_lot
         )
 
     def test_change_lot_reserved_partial_qty_ok(self):
@@ -254,21 +272,27 @@ class TestActionsChangePackageLot(CommonCase):
             self.unreachable_func,
         )
 
-        self.assertRecordValues(line, [{"lot_id": new_lot.id, "reserved_qty": 8}])
+        self.assertRecordValues(
+            line, [{"lot_id": new_lot.id, "quantity_product_uom": 8}]
+        )
         other_line = picking.move_line_ids - line
         self.assertRecordValues(
-            other_line, [{"lot_id": initial_lot.id, "reserved_qty": 2}]
+            other_line, [{"lot_id": initial_lot.id, "quantity_product_uom": 2}]
         )
         # line has been re-created
         line2 = picking2.move_line_ids
-        self.assertRecordValues(line2, [{"lot_id": initial_lot.id, "reserved_qty": 8}])
+        self.assertRecordValues(
+            line2, [{"lot_id": initial_lot.id, "quantity_product_uom": 8}]
+        )
 
         # check that reservations have been updated
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=new_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=new_lot
+        )
         # both line2 and the line for the 2 remaining will re-reserve the initial lot
         self.assert_quant_reserved_qty(
             other_line,
-            lambda: line2.reserved_qty + other_line.reserved_qty,
+            lambda: line2.quantity_product_uom + other_line.quantity_product_uom,
             lot=initial_lot,
         )
 
@@ -303,12 +327,19 @@ class TestActionsChangePackageLot(CommonCase):
         )
 
         # no changes
-        self.assertRecordValues(line, [{"lot_id": initial_lot.id, "reserved_qty": 10}])
         self.assertRecordValues(
-            line2, [{"lot_id": new_lot.id, "reserved_qty": 10, "qty_done": 10.0}]
+            line, [{"lot_id": initial_lot.id, "quantity_product_uom": 10}]
         )
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=initial_lot)
-        self.assert_quant_reserved_qty(line2, lambda: line2.reserved_qty, lot=new_lot)
+        self.assertRecordValues(
+            line2,
+            [{"lot_id": new_lot.id, "quantity_product_uom": 10, "qty_done": 10.0}],
+        )
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=initial_lot
+        )
+        self.assert_quant_reserved_qty(
+            line2, lambda: line2.quantity_product_uom, lot=new_lot
+        )
 
     def test_change_lot_different_location_error(self):
         "If the scanned lot is in a different location, we cannot process it"
@@ -333,7 +364,9 @@ class TestActionsChangePackageLot(CommonCase):
 
         self.assertRecordValues(line, [{"lot_id": initial_lot.id}])
         # check that reservations have not been updated
-        self.assert_quant_reserved_qty(line, lambda: line.reserved_qty, lot=initial_lot)
+        self.assert_quant_reserved_qty(
+            line, lambda: line.quantity_product_uom, lot=initial_lot
+        )
         self.assert_quant_reserved_qty(line, lambda: 0, lot=new_lot)
 
     def test_change_lot_in_several_packages_error(self):
@@ -398,7 +431,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": new_package.id,
                     "result_package_id": new_package.id,
                     "lot_id": new_lot.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -406,7 +439,7 @@ class TestActionsChangePackageLot(CommonCase):
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 0, package=initial_package)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=new_package
+            line, lambda: line.quantity_product_uom, package=new_package
         )
 
     def test_change_lot_in_package_no_initial_package_ok(self):
@@ -438,7 +471,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": new_package.id,
                     "result_package_id": new_package.id,
                     "lot_id": new_lot.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -446,7 +479,7 @@ class TestActionsChangePackageLot(CommonCase):
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 0, lot=initial_lot)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=new_package
+            line, lambda: line.quantity_product_uom, package=new_package
         )
 
     def test_change_pack_different_content_error(self):
@@ -547,7 +580,7 @@ class TestActionsChangePackageLot(CommonCase):
                     # we are no longer moving an entire package
                     "result_package_id": False,
                     "lot_id": new_lot_a.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -559,17 +592,17 @@ class TestActionsChangePackageLot(CommonCase):
                     # we are no longer moving an entire package
                     "result_package_id": False,
                     "lot_id": initial_lot_b.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line1, lambda: 0, package=initial_package)
         self.assert_quant_reserved_qty(
-            line2, lambda: line2.reserved_qty, package=initial_package
+            line2, lambda: line2.quantity_product_uom, package=initial_package
         )
         self.assert_quant_reserved_qty(
-            line1, lambda: line1.reserved_qty, package=new_package
+            line1, lambda: line1.quantity_product_uom, package=new_package
         )
         self.assert_quant_reserved_qty(line2, lambda: 0, package=new_package)
 
@@ -613,7 +646,7 @@ class TestActionsChangePackageLot(CommonCase):
         self.assert_quant_package_qty(self.shelf2, new_package, lambda: 0)
         self.assert_quant_reserved_qty(line, lambda: 0, package=initial_package)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=new_package
+            line, lambda: line.quantity_product_uom, package=new_package
         )
 
     def test_change_pack_different_location_reserved_package(self):
@@ -665,13 +698,13 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": new_package.id,
                     "result_package_id": new_package.id,
                     "location_id": self.shelf1.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 },
                 {
                     "package_id": initial_package.id,
                     "result_package_id": initial_package.id,
                     "location_id": self.shelf1.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 },
             ],
         )
@@ -684,10 +717,10 @@ class TestActionsChangePackageLot(CommonCase):
         # for the initial package anymore
         self.assert_quant_package_qty(self.shelf2, new_package, lambda: 0)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=new_package
+            line, lambda: line.quantity_product_uom, package=new_package
         )
         self.assert_quant_reserved_qty(
-            line2, lambda: line2.reserved_qty, package=initial_package
+            line2, lambda: line2.quantity_product_uom, package=initial_package
         )
 
     def test_change_pack_different_location_reserved_package_qty_done(self):
@@ -736,13 +769,13 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": initial_package.id,
                     "result_package_id": initial_package.id,
                     "location_id": self.shelf1.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 },
                 {
                     "package_id": new_package.id,
                     "result_package_id": new_package.id,
                     "location_id": self.shelf2.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 },
             ],
         )
@@ -755,10 +788,10 @@ class TestActionsChangePackageLot(CommonCase):
         )
         self.assert_quant_package_qty(self.shelf2, new_package, lambda: 10.0)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=initial_package
+            line, lambda: line.quantity_product_uom, package=initial_package
         )
         self.assert_quant_reserved_qty(
-            line2, lambda: line2.reserved_qty, package=new_package
+            line2, lambda: line2.quantity_product_uom, package=new_package
         )
 
     def test_change_pack_lot_change_pack_less_qty_ok(self):
@@ -778,7 +811,7 @@ class TestActionsChangePackageLot(CommonCase):
                     # since we don't move the entire package (10 out of 100), no
                     # result package
                     "result_package_id": False,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -807,7 +840,7 @@ class TestActionsChangePackageLot(CommonCase):
                 {
                     "package_id": new_package.id,
                     "result_package_id": new_package.id,
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -816,7 +849,7 @@ class TestActionsChangePackageLot(CommonCase):
         # check that reservations have been updated
         self.assert_quant_reserved_qty(line, lambda: 0, package=initial_package)
         self.assert_quant_reserved_qty(
-            line, lambda: line.reserved_qty, package=new_package
+            line, lambda: line.quantity_product_uom, package=new_package
         )
 
     def test_change_pack_steal_from_other_move_line(self):
@@ -861,7 +894,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": package2.id,
                     "result_package_id": package2.id,
                     "state": "assigned",
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -872,7 +905,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "package_id": package1.id,
                     "result_package_id": package1.id,
                     "state": "assigned",
-                    "reserved_qty": 10.0,
+                    "quantity_product_uom": 10.0,
                 }
             ],
         )
@@ -887,12 +920,12 @@ class TestActionsChangePackageLot(CommonCase):
         # check that reservations have been updated
         self.assert_quant_reserved_qty(
             picking1.move_line_ids,
-            lambda: picking1.move_line_ids.reserved_qty,
+            lambda: picking1.move_line_ids.quantity_product_uom,
             package=package2,
         )
         self.assert_quant_reserved_qty(
             picking2.move_line_ids,
-            lambda: picking2.move_line_ids.reserved_qty,
+            lambda: picking2.move_line_ids.quantity_product_uom,
             package=package1,
         )
 
@@ -967,12 +1000,12 @@ class TestActionsChangePackageLot(CommonCase):
         # check that reservations have been updated
         self.assert_quant_reserved_qty(
             picking1.move_line_ids,
-            lambda: picking1.move_line_ids.reserved_qty,
+            lambda: picking1.move_line_ids.quantity_product_uom,
             package=package1,
         )
         self.assert_quant_reserved_qty(
             picking2.move_line_ids,
-            lambda: picking2.move_line_ids.reserved_qty,
+            lambda: picking2.move_line_ids.quantity_product_uom,
             package=package2,
         )
 
@@ -1007,7 +1040,7 @@ class TestActionsChangePackageLot(CommonCase):
 
         # this line is picked, should not be changed, but we still have
         # 2 units in package2
-        line2.qty_done = line2.reserved_qty
+        line2.qty_done = line2.quantity_product_uom
 
         self.change_package_lot.change_package(
             line1,
@@ -1030,7 +1063,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "state": "assigned",
                     # as the remaining was 2 units, the line is
                     # changed to take only 2
-                    "reserved_qty": 2.0,
+                    "quantity_product_uom": 2.0,
                 }
             ],
         )
@@ -1043,7 +1076,7 @@ class TestActionsChangePackageLot(CommonCase):
                     # not moved entirely by this transfer
                     "result_package_id": False,
                     "state": "assigned",
-                    "reserved_qty": 8.0,
+                    "quantity_product_uom": 8.0,
                 }
             ],
         )
@@ -1062,7 +1095,7 @@ class TestActionsChangePackageLot(CommonCase):
                     "result_package_id": False,
                     "state": "assigned",
                     # remaining qty for the 1st move
-                    "reserved_qty": 8.0,
+                    "quantity_product_uom": 8.0,
                 }
             ],
         )
@@ -1105,7 +1138,7 @@ class TestActionsChangePackageLot(CommonCase):
         )
 
         # this line is picked and must not be changed
-        line1.qty_done = line1.reserved_qty
+        line1.qty_done = line1.quantity_product_uom
 
         # as we change for package2, the line should get only the remaining
         # part of the package
@@ -1127,13 +1160,13 @@ class TestActionsChangePackageLot(CommonCase):
                 {
                     "package_id": package1.id,
                     "state": "assigned",
-                    "reserved_qty": 4.0,
+                    "quantity_product_uom": 4.0,
                     "qty_done": 4.0,
                 },
                 {
                     "package_id": package3.id,
                     "state": "assigned",
-                    "reserved_qty": 6.0,
+                    "quantity_product_uom": 6.0,
                     "qty_done": 0.0,
                 },
             ],
