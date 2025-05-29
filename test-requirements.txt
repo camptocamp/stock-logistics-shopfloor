@@ -1,0 +1,1 @@
+odoo-addon-stock_move_line_change_lot @ git+https://github.com/OCA/stock-logistics-workflow@refs/pull/1971/head#subdirectory=stock_move_line_change_lot
