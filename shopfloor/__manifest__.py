@@ -48,6 +48,9 @@
         "product_packaging_level",
         #  OCA / delivery
         "stock_picking_delivery_link",
+        # TODO v18: new dependency due to ``available_carriers`` that needs a SO.
+        # see picking_form.py
+        "sale_stock",
     ],
     "data": [
         "data/shopfloor_scenario_data.xml",
