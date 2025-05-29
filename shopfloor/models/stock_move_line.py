@@ -270,7 +270,7 @@ class StockMoveLine(models.Model):
 
         available_quantity = quant.quantity - quant.reserved_quantity
         if is_lesser(
-            available_quantity, self.reserved_qty, quant.product_uom_id.rounding
+            available_quantity, self.quantity_product_uom, quant.product_uom_id.rounding
         ):
             new_uom_qty = self.product_id.uom_id._compute_quantity(
                 available_quantity, self.product_uom_id, rounding_method="HALF-UP"

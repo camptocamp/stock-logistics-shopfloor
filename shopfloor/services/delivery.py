@@ -288,7 +288,7 @@ class Delivery(Component):
         if product_qty:
             domain.extend(
                 [
-                    ("reserved_qty", ">=", product_qty),
+                    ("quantity_product_uom", ">=", product_qty),
                 ]
             )
         if picking:
@@ -317,7 +317,7 @@ class Delivery(Component):
         if product_qty:
             domain.extend(
                 [
-                    ("reserved_qty", ">=", product_qty),
+                    ("quantity_product_uom", ">=", product_qty),
                 ]
             )
         if picking:

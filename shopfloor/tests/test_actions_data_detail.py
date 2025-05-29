@@ -24,7 +24,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         move_lines = self.env["stock.move.line"].search(
             [
                 ("location_id", "child_of", location.id),
-                ("reserved_qty", ">", 0),
+                ("quantity_product_uom", ">", 0),
                 ("state", "not in", ("done", "cancel")),
             ]
         )
