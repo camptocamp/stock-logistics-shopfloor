@@ -29,6 +29,14 @@ class StockMoveLine(models.Model):
     # allow domain on picking_id.xxx without too much perf penalty
     picking_id = fields.Many2one(auto_join=True)
 
+    qty_done = fields.Float(compute="_compute_qty_done")
+
+    # TODO: only to ease parsers
+    # remove from any logic?
+    def _compute_qty_done(self):
+        for line in self:
+            line.qty_done = line.quantity if line.picked else 0.0
+
     def _split_partial_quantity(self):
         """Create new move line for the quantity remaining to do
 
