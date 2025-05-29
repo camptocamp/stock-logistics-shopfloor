@@ -218,7 +218,8 @@ class DataAction(Component):
         return [
             "id",
             "qty_done",
-            "reserved_uom_qty:quantity",
+            # FIXME
+            "quantity",  # was reserved_uom_qty
             ("product_id:product", self._product_parser),
             ("lot_id:lot", self._lot_parser),
             ("location_id:location_src", self._location_parser),
