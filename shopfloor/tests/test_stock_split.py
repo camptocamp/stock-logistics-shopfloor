@@ -25,7 +25,7 @@ class TestStockSplit(TransactionCase):
             .create(
                 {
                     "name": "Product A",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "A",
                     "barcode": "A",
                     "weight": 2,
@@ -49,7 +49,7 @@ class TestStockSplit(TransactionCase):
             .create(
                 {
                     "name": "Product B",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "B",
                     "barcode": "B",
                     "weight": 2,

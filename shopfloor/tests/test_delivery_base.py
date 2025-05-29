@@ -25,7 +25,7 @@ class DeliveryCommonCase(CommonCase):
             .create(
                 {
                     "name": "Product E",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "E",
                     "barcode": "E",
                     "weight": 3,
@@ -49,7 +49,7 @@ class DeliveryCommonCase(CommonCase):
             .create(
                 {
                     "name": "Product F",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "F",
                     "barcode": "F",
                     "weight": 3,
@@ -73,7 +73,7 @@ class DeliveryCommonCase(CommonCase):
             .create(
                 {
                     "name": "Product G",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "G",
                     "barcode": "G",
                     "weight": 1,

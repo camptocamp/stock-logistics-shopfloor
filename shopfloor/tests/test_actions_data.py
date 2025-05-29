@@ -221,7 +221,7 @@ class ActionsDataCase(ActionsDataCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 3.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product(self.product_a),
             "lot": None,
             "package_src": {
@@ -258,7 +258,7 @@ class ActionsDataCase(ActionsDataCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product(self.product_b),
             "lot": {
                 "id": move_line.lot_id.id,
@@ -283,7 +283,7 @@ class ActionsDataCase(ActionsDataCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product(self.product_c),
             "lot": {
                 "id": move_line.lot_id.id,
@@ -328,7 +328,7 @@ class ActionsDataCase(ActionsDataCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product(self.product_d),
             "lot": None,
             "package_src": None,
@@ -347,7 +347,7 @@ class ActionsDataCase(ActionsDataCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product(self.product_d),
             "lot": None,
             "package_src": None,

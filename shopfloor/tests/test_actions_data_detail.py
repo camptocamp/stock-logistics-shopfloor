@@ -187,7 +187,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 3.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": None,
             "package_src": {
@@ -227,7 +227,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": {
                 "id": move_line.lot_id.id,
@@ -252,7 +252,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": {
                 "id": move_line.lot_id.id,
@@ -297,7 +297,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         expected = {
             "id": move_line.id,
             "qty_done": 0.0,
-            "quantity": move_line.reserved_uom_qty,
+            "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": None,
             "package_src": None,

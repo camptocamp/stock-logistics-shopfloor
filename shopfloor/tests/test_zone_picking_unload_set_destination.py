@@ -21,7 +21,7 @@ class ZonePickingUnloadSetDestinationCase(ZonePickingCommonCase):
             .create(
                 {
                     "name": "Product Z",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "Z",
                     "barcode": "Z",
                     "weight": 7,

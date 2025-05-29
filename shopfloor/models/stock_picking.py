@@ -59,7 +59,7 @@ class StockPicking(models.Model):
         )
         # if we set a qty_done on any line, it's picked, we don't want
         # to change it in any case, so we ignore the package level
-        if any(pack_move_lines.mapped("qty_done")):
+        if any(pack_move_lines.mapped("picked")):
             return False
         # if we already changed the destination package, do not create
         # a new package level
