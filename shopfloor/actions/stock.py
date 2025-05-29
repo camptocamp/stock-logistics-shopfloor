@@ -125,7 +125,7 @@ class StockAction(Component):
                     _("Someone is already working on these transfers")
                 )
         for line in move_lines:
-            qty_done = quantity if quantity is not None else line.reserved_uom_qty
+            qty_done = quantity if quantity is not None else line.quantity
             line.qty_done = qty_done
             if split:
                 line._split_partial_quantity()

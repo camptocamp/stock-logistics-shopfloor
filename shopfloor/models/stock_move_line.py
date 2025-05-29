@@ -47,20 +47,18 @@ class StockMoveLine(models.Model):
         if float_is_zero(self.qty_done, precision_rounding=rounding):
             return self.browse()
         compare = float_compare(
-            self.qty_done, self.reserved_uom_qty, precision_rounding=rounding
+            self.qty_done, self.quantity, precision_rounding=rounding
         )
         qty_lesser = compare == -1
         qty_greater = compare == 1
         assert not qty_greater, "Quantity done cannot exceed quantity to do"
         if qty_lesser:
-            remaining = self.reserved_uom_qty - self.qty_done
-            new_line = self.copy({"reserved_uom_qty": remaining, "qty_done": 0})
+            remaining = self.quantity - self.qty_done
+            new_line = self.copy({"quantity": remaining, "qty_done": 0})
             # if we didn't bypass reservation update, the quant reservation
             # would be reduced as much as the deduced quantity, which is wrong
             # as we only moved the quantity to a new move line
-            self.with_context(
-                bypass_reservation_update=True
-            ).reserved_uom_qty = self.qty_done
+            self.with_context(bypass_reservation_update=True).quantity = self.qty_done
             return new_line
         return self.browse()
 
@@ -162,14 +160,12 @@ class StockMoveLine(models.Model):
         :param split_partial: split if qty is less than expected
             otherwise rely on a backorder.
         """
-        if self.reserved_uom_qty < 0:
+        if self.quantity < 0:
             raise UserError(_("The demand cannot be negative"))
         # store a new line if we have split our line (not enough qty)
         new_line = self.env["stock.move.line"]
         rounding = self.product_uom_id.rounding
-        compare = float_compare(
-            qty_done, self.reserved_uom_qty, precision_rounding=rounding
-        )
+        compare = float_compare(qty_done, self.quantity, precision_rounding=rounding)
         qty_lesser = compare == -1
         qty_greater = compare == 1
         if qty_greater:
@@ -188,16 +184,14 @@ class StockMoveLine(models.Model):
         # split the move line which will be processed later (maybe the user
         # has to pick some goods from another place because the location
         # contained less items than expected)
-        remaining = self.reserved_uom_qty - quantity_done
-        vals = {"reserved_uom_qty": remaining, "qty_done": 0}
+        remaining = self.quantity - quantity_done
+        vals = {"quantity": remaining}
         vals.update(split_default_vals)
         new_line = self.copy(vals)
         # if we didn't bypass reservation update, the quant reservation
         # would be reduced as much as the deduced quantity, which is wrong
         # as we only moved the quantity to a new move line
-        self.with_context(
-            bypass_reservation_update=True
-        ).reserved_uom_qty = quantity_done
+        self.with_context(bypass_reservation_update=True).quantity = quantity_done
         return new_line
 
     def replace_package(self, new_package):
@@ -213,9 +207,7 @@ class StockMoveLine(models.Model):
         )
 
         # we can't change already picked lines
-        unreservable_lines = other_reserved_lines.filtered(
-            lambda line: line.qty_done == 0
-        )
+        unreservable_lines = other_reserved_lines.filtered(lambda line: not line.picked)
         to_assign_moves = unreservable_lines.move_id
 
         # if we leave the package level, it will try to reserve the same
@@ -283,13 +275,13 @@ class StockMoveLine(models.Model):
             new_uom_qty = self.product_id.uom_id._compute_quantity(
                 available_quantity, self.product_uom_id, rounding_method="HALF-UP"
             )
-            values["reserved_uom_qty"] = new_uom_qty
+            values["quantity"] = new_uom_qty
 
         self.write(values)
 
         # try reassign the move in case we had a partial qty, also, it will
         # recreate a package level if it applies
-        if "reserved_uom_qty" in values:
+        if "quantity" in values:
             # when we change the quantity of the move, the state
             # will still be "assigned" and be skipped by "_action_assign",
             # recompute the state to be "partially_available"
@@ -324,5 +316,5 @@ class StockMoveLine(models.Model):
 
         """
         res = super().shopfloor_postpone(*recordsets)
-        self.qty_done = 0.0
+        self.picked = False
         return res
