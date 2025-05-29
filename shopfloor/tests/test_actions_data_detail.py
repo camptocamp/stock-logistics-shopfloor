@@ -203,7 +203,7 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
             "package_dest": {
                 "id": result_package.id,
                 "name": result_package.name,
-                "weight": 20.0,
+                "weight": 6.0,
                 "storage_type": None,
                 "total_quantity": sum(
                     move_line.result_package_id.quant_ids.mapped("quantity")

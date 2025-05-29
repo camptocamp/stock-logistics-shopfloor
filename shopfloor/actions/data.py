@@ -228,7 +228,8 @@ class DataAction(Component):
                 "move_id:priority",
                 lambda rec, fname: rec.move_id.priority or "",
             ),
-            "progress",
+            # TODO: progress is not available on move lines anymore, what to do for UI?
+            # "progress",
         ]
 
     @ensure_model("stock.move")
@@ -360,7 +361,7 @@ class DataAction(Component):
         operations_done = 0
         for line in lines:
             operations_done += line.qty_done
-            operations_to_do += line.reserved_uom_qty - line.qty_done
+            operations_to_do += line.quantity - line.qty_done
         return {
             "done": operations_done,
             "to_do": operations_to_do,

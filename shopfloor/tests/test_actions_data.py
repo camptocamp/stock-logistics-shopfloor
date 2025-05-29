@@ -54,7 +54,7 @@ class ActionsDataCase(ActionsDataCaseBase):
             "barcode": location.name,
             "operation_progress": {
                 "done": 0.0,
-                "to_do": 228.0,
+                "to_do": 323.0,
             },
         }
         self.assertDictEqual(data, expected)
@@ -178,7 +178,7 @@ class ActionsDataCase(ActionsDataCaseBase):
             "partner": {"id": self.customer.id, "name": self.customer.name},
             "carrier": {"id": carrier.id, "name": carrier.name},
             "ship_carrier": None,
-            "progress": 0.0,
+            "progress": 100.0,
             "priority": "0",
         }
         self.assertEqual(data.pop("scheduled_date").split("T")[0], "2020-08-03")
@@ -243,7 +243,6 @@ class ActionsDataCase(ActionsDataCaseBase):
             "location_src": self._expected_location(move_line.location_id),
             "location_dest": self._expected_location(move_line.location_dest_id),
             "priority": "1",
-            "progress": 30.0,
         }
         self.assertDictEqual(data, expected)
         data = self.data.move_line(move_line, with_package_move_line_count=True)
@@ -271,7 +270,6 @@ class ActionsDataCase(ActionsDataCaseBase):
             "location_src": self._expected_location(move_line.location_id),
             "location_dest": self._expected_location(move_line.location_dest_id),
             "priority": "1",
-            "progress": 0.0,
         }
         self.assertDictEqual(data, expected)
 
@@ -294,7 +292,7 @@ class ActionsDataCase(ActionsDataCaseBase):
             "package_src": {
                 "id": move_line.package_id.id,
                 "name": move_line.package_id.name,
-                "weight": 30,
+                "weight": 30.0,
                 "storage_type": None,
                 "total_quantity": sum(
                     move_line.package_id.quant_ids.mapped("quantity")
@@ -303,7 +301,7 @@ class ActionsDataCase(ActionsDataCaseBase):
             "package_dest": {
                 "id": move_line.result_package_id.id,
                 "name": move_line.result_package_id.name,
-                "weight": 0,
+                "weight": 30.0,
                 "storage_type": None,
                 "total_quantity": sum(
                     move_line.result_package_id.quant_ids.mapped("quantity")
@@ -312,7 +310,6 @@ class ActionsDataCase(ActionsDataCaseBase):
             "location_src": self._expected_location(move_line.location_id),
             "location_dest": self._expected_location(move_line.location_dest_id),
             "priority": "1",
-            "progress": 0.0,
         }
         self.assertDictEqual(data, expected)
         data = self.data.move_line(move_line, with_package_move_line_count=True)
@@ -336,7 +333,6 @@ class ActionsDataCase(ActionsDataCaseBase):
             "location_src": self._expected_location(move_line.location_id),
             "location_dest": self._expected_location(move_line.location_dest_id),
             "priority": "1",
-            "progress": 0.0,
         }
         self.assertDictEqual(data, expected)
 
@@ -356,7 +352,6 @@ class ActionsDataCase(ActionsDataCaseBase):
             "location_dest": self._expected_location(move_line.location_dest_id),
             "picking": self.data.picking(move_line.picking_id),
             "priority": "1",
-            "progress": 0.0,
         }
         self.assertDictEqual(data, expected)
 
