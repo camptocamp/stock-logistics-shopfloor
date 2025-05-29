@@ -26,7 +26,7 @@ class LocationContentTransferCommonCase(CommonCase):
             .create(
                 {
                     "name": "Product E",
-                    "type": "product",
+                    "is_storable": True,
                     "default_code": "E",
                     "barcode": "E",
                     "weight": 3,
