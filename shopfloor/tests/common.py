@@ -3,7 +3,7 @@
 from collections import namedtuple
 
 from odoo import models
-from odoo.tests.common import Form
+from odoo.tests import Form
 
 from odoo.addons.shopfloor_base.tests.common import CommonCase as BaseCommonCase
 
