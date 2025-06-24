@@ -217,9 +217,9 @@ class DataAction(Component):
     def _move_line_parser(self):
         return [
             "id",
-            "qty_done",
-            # FIXME
-            "quantity",  # was reserved_uom_qty
+            "picked",
+            "quantity_picked",
+            "quantity",
             ("product_id:product", self._product_parser),
             ("lot_id:lot", self._lot_parser),
             ("location_id:location_src", self._location_parser),
@@ -360,8 +360,8 @@ class DataAction(Component):
         operations_to_do = 0
         operations_done = 0
         for line in lines:
-            operations_done += line.qty_done
-            operations_to_do += line.quantity - line.qty_done
+            operations_done += line.quantity_picked
+            operations_to_do += line.quantity
         return {
             "done": operations_done,
             "to_do": operations_to_do,

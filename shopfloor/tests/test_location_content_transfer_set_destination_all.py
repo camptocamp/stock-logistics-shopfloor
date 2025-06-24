@@ -47,10 +47,30 @@ class LocationContentTransferSetDestinationAllCase(LocationContentTransferCommon
         self.assertRecordValues(
             self.pickings.move_line_ids,
             [
-                {"qty_done": 10.0, "state": "done", "location_dest_id": destination.id},
-                {"qty_done": 10.0, "state": "done", "location_dest_id": destination.id},
-                {"qty_done": 10.0, "state": "done", "location_dest_id": destination.id},
-                {"qty_done": 10.0, "state": "done", "location_dest_id": destination.id},
+                {
+                    "quantity": 10.0,
+                    "picked": True,
+                    "state": "done",
+                    "location_dest_id": destination.id,
+                },
+                {
+                    "quantity": 10.0,
+                    "picked": True,
+                    "state": "done",
+                    "location_dest_id": destination.id,
+                },
+                {
+                    "quantity": 10.0,
+                    "picked": True,
+                    "state": "done",
+                    "location_dest_id": destination.id,
+                },
+                {
+                    "quantity": 10.0,
+                    "picked": True,
+                    "state": "done",
+                    "location_dest_id": destination.id,
+                },
             ],
         )
         self.assertRecordValues(

@@ -2,8 +2,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import werkzeug
 
-from odoo import fields
-
 from .test_checkout_base import CheckoutCommonCase
 from .test_checkout_select_package_base import CheckoutSelectPackageMixin
 
@@ -33,9 +31,9 @@ class CheckoutNoPackageCase(CheckoutCommonCase, CheckoutSelectPackageMixin):
         selected_lines = move_line1 + move_line2
 
         # we'll put only the first 2 lines (product A and B) w/ no package
-        move_line1.qty_done = move_line1.quantity
-        move_line2.qty_done = move_line2.quantity
-        move_line3.qty_done = 0
+        move_line1.picked = True
+        move_line2.picked = True
+        move_line3.picked = False
         response = self.service.dispatch(
             "no_package",
             params={
@@ -78,18 +76,3 @@ class CheckoutNoPackageCase(CheckoutCommonCase, CheckoutSelectPackageMixin):
                 },
             )
             self.assertEqual(repr(err), "`checkout.no_package` endpoint is not enabled")
-
-    def test_set_dest_package_error_qty_done_above(self):
-        # If the qty_done of a selected line goes beyond
-        # the maximum allowed, a message should be displayed
-        # and the user shouldn't be allowed to select a package.
-        line = fields.first(self.picking.move_line_ids)
-        line.qty_done = line.quantity + 1
-        response = self.service.dispatch(
-            "list_dest_package",
-            params={
-                "picking_id": self.picking.id,
-                "selected_line_ids": self.picking.move_line_ids.ids,
-            },
-        )
-        self._assert_select_package_qty_above(response, self.picking)

@@ -155,19 +155,22 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
             [
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "location_dest_id": self.packing_location.id,
                 },
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "location_dest_id": self.packing_location.id,
                 },
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "location_dest_id": self.packing_location.id,
                 },
@@ -185,7 +188,7 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
         # Put destination packages, the whole quantity on lines and a similar
         # destination (when /set_destination_all is called, all the lines to
         # unload must have the same destination).
-        # However, we keep a line without qty_done and destination package,
+        # However, we keep a line not picked and destination package,
         # so when the dest location is set, the endpoint should route back
         # to the 'start_line' state to work on the remaining line.
         lines_to_unload = self.move_lines[:2]
@@ -209,14 +212,16 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
             [
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "picking_id": self.one_line_picking.id,
                     "location_dest_id": self.packing_location.id,
                 },
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     # will be done when the second line of the picking is unloaded
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
@@ -224,7 +229,7 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
                 },
                 {
                     "shopfloor_unloaded": False,
-                    "qty_done": 0,
+                    "picked": False,
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_location.id,
@@ -589,7 +594,8 @@ class ClusterPickingUnloadScanDestinationCase(ClusterPickingUnloadingCommonCase)
             [
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "picking_id": self.one_line_picking.id,
                     "location_dest_id": self.packing_a_location.id,
@@ -601,14 +607,16 @@ class ClusterPickingUnloadScanDestinationCase(ClusterPickingUnloadingCommonCase)
             [
                 {
                     "shopfloor_unloaded": False,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_b_location.id,
                 },
                 {
                     "shopfloor_unloaded": False,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_b_location.id,
@@ -705,7 +713,8 @@ class ClusterPickingUnloadScanDestinationCase(ClusterPickingUnloadingCommonCase)
             [
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_b_location.id,
@@ -717,7 +726,8 @@ class ClusterPickingUnloadScanDestinationCase(ClusterPickingUnloadingCommonCase)
             [
                 {
                     "shopfloor_unloaded": False,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "assigned",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_b_location.id,
@@ -765,7 +775,8 @@ class ClusterPickingUnloadScanDestinationCase(ClusterPickingUnloadingCommonCase)
             [
                 {
                     "shopfloor_unloaded": True,
-                    "qty_done": 10,
+                    "quantity": 10,
+                    "picked": True,
                     "state": "done",
                     "picking_id": self.two_lines_picking.id,
                     "location_dest_id": self.packing_b_location.id,

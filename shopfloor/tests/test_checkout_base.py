@@ -1,6 +1,5 @@
 # Copyright 2020 Camptocamp SA (http://www.camptocamp.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo.fields import first
 
 from .common import CommonCase
 
@@ -72,25 +71,3 @@ class CheckoutCommonCase(CommonCase):
         }
         data.update(kw)
         return data
-
-    def _assert_select_package_qty_above(self, response, picking):
-        line = first(picking.move_line_ids)
-        self.assert_response(
-            response,
-            next_state="select_package",
-            data={
-                "selected_move_lines": [
-                    self._move_line_data(ml) for ml in picking.move_line_ids.sorted()
-                ],
-                "picking": self._picking_summary_data(picking),
-                "packing_info": "",
-                "no_package_enabled": True,
-                "package_allowed": True,
-            },
-            message={
-                "message_type": "warning",
-                "body": "The quantity scanned for one or more lines cannot be "
-                "higher than the maximum allowed. "
-                f"({line.product_id.name} : {str(line.qty_done)} > {str(line.quantity)})",  # noqa
-            },
-        )

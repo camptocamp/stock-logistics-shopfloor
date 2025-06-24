@@ -68,7 +68,7 @@ class ZonePickingSetLineDestinationPickPackCase(ZonePickingCommonCase):
         move_line = self.picking1.move_line_ids
         move_line.location_dest_id = self.shelf1
         quantity_done = move_line.quantity
-        previous_qty_done = move_line.qty_done
+        previous_quantity_picked = move_line.quantity_picked
         # Confirm the destination with the right destination
         response = self.service.dispatch(
             "set_destination",
@@ -78,7 +78,7 @@ class ZonePickingSetLineDestinationPickPackCase(ZonePickingCommonCase):
                 "quantity": quantity_done,
             },
         )
-        self.assertEqual(move_line.qty_done, previous_qty_done)
+        self.assertEqual(move_line.quantity, previous_quantity_picked)
         self.assert_response_set_line_destination(
             response,
             zone_location,
@@ -220,7 +220,7 @@ class ZonePickingSetLineDestinationPickPackCase(ZonePickingCommonCase):
                 {
                     "result_package_id": self.free_package.id,
                     "quantity": 10,
-                    "qty_done": 10,
+                    "picked": True,
                     "shopfloor_user_id": self.env.user.id,
                 },
             ],

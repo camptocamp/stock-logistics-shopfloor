@@ -1,6 +1,5 @@
 # Copyright 2020 Camptocamp SA (http://www.camptocamp.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import fields
 
 from .test_checkout_base import CheckoutCommonCase
 from .test_checkout_select_package_base import CheckoutSelectPackageMixin
@@ -137,9 +136,9 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
         # them
         cls.move_line1.result_package_id = cls.delivery_package
         # We'll put only product A and B in the destination package
-        cls.move_line1.qty_done = cls.move_line1.quantity
-        cls.move_line2.qty_done = cls.move_line2.quantity
-        cls.move_line3.qty_done = 0
+        cls.move_line1.picked = True
+        cls.move_line2.picked = True
+        cls.move_line3.picked = False
 
         cls.picking = picking
 
@@ -161,7 +160,7 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
                     "result_package_id": self.delivery_package.id,
                     "shopfloor_checkout_done": True,
                 },
-                # qty_done was zero so we don't set it as packed
+                # not picked so we don't set it as packed
                 {"result_package_id": self.pack1.id, "shopfloor_checkout_done": False},
             ],
         )
@@ -232,9 +231,11 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
         )
         self._assert_package_set(response)
 
-    def test_set_dest_package_ok_on_partial_qty_done(self):
-        # Partially process line three 3 quantiy out of 10
-        self.move_line3.qty_done = 3
+    def test_set_dest_package_ok_on_partial_picked(self):
+        # Partially process line three 3 quantity out of 10
+        self.move_line3.quantity = 3
+        self.move_line3.picked = True
+        self.move_line3.copy({"quantity": 7})
         response = self.service.dispatch(
             "set_dest_package",
             params={
@@ -259,14 +260,14 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
                 {
                     "result_package_id": self.delivery_package.id,
                     "shopfloor_checkout_done": True,
-                    "product_uom_qty": 3,
-                    "qty_done": 3,
+                    "quantity": 3,
+                    "picked": True,
                 },
             ],
         )
         # Left quantity to do from line 3
         new_move_line = self.picking.move_line_ids.filtered(
-            lambda line: line.qty_done == 0 and line.quantity == 7
+            lambda line: not line.picked and line.quantity == 7
         )
         self.assertTrue(new_move_line)
         self.assertFalse(new_move_line.shopfloor_checkout_done)
@@ -312,18 +313,3 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
             self._get_allowed_packages(self.picking),
             message=self.service.msg_store.dest_package_not_valid(package),
         )
-
-    def test_set_dest_package_error_qty_done_above(self):
-        # If the qty_done of a selected line goes beyond
-        # the maximum allowed, a message should be displayed
-        # and the user shouldn't be allowed to select a package.
-        line = fields.first(self.picking.move_line_ids)
-        line.qty_done = line.quantity + 1
-        response = self.service.dispatch(
-            "list_dest_package",
-            params={
-                "picking_id": self.picking.id,
-                "selected_line_ids": self.picking.move_line_ids.ids,
-            },
-        )
-        self._assert_select_package_qty_above(response, self.picking)

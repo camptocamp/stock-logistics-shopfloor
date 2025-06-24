@@ -181,13 +181,16 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         result_package = self.env["stock.quant.package"].create(
             {"product_packaging_id": self.packaging.id}
         )
-        move_line.write({"qty_done": 3.0, "result_package_id": result_package.id})
+        move_line.write(
+            {"quantity": 3.0, "picked": True, "result_package_id": result_package.id}
+        )
         data = self.data_detail.move_line(move_line)
         self.assert_schema(self.schema_detail.move_line(), data)
         product = self.product_a.with_context(location=move_line.location_id.id)
         expected = {
             "id": move_line.id,
-            "qty_done": 3.0,
+            "picked": True,
+            "quantity_picked": move_line.quantity,
             "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": None,
@@ -226,7 +229,8 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         product = self.product_b.with_context(location=move_line.location_id.id)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": {
@@ -250,7 +254,8 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         product = self.product_c.with_context(location=move_line.location_id.id)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": {
@@ -294,7 +299,8 @@ class TestActionsDataDetailCase(ActionsDataDetailCaseBase):
         product = self.product_d.with_context(location=move_line.location_id.id)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product_detail(product),
             "lot": None,
