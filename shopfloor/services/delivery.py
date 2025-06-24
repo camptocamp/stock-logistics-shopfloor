@@ -214,6 +214,8 @@ class Delivery(Component):
             qty_done = lines.move_id.product_id.uom_id._compute_quantity(
                 product_qty, lines.move_id.product_uom
             )
+            # FIXME: check this now we cannot have one
+            # move line with 2 units reserved and 1 unit picked?
             lines.qty_done += qty_done
             return self._action_picking_done(
                 lines.picking_id, force=allow_prepackaged_product

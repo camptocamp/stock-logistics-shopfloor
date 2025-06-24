@@ -62,7 +62,7 @@ class ZonePicking(Component):
        * they scan a location, in which case the move line's destination is
          updated with it and the move is done
        * they scan a package, which becomes the destination package of the move
-         line, the move line is not set to done, its ``qty_done`` is updated
+         line, the move line is not set to done, its ``picked`` flag is updated
          and a field ``shopfloor_user_id`` is set to the user; consider the
          move line is set in a buffer
 
@@ -450,7 +450,8 @@ class ZonePicking(Component):
     def _find_buffer_move_lines_domain(self, dest_package=None):
         domain = [
             ("picking_id.picking_type_id", "in", self.picking_types.ids),
-            ("qty_done", ">", 0),
+            ("quantity", ">", 0),
+            ("picked", "=", True),
             ("state", "not in", ("cancel", "done")),
             ("result_package_id", "!=", False),
             ("shopfloor_user_id", "=", self.env.user.id),
@@ -581,7 +582,10 @@ class ZonePicking(Component):
         if move_lines:
             move_line = first(move_lines)
             response = self._response_for_set_line_destination(
-                move_line, qty_done=self._get_prefill_qty(move_line)
+                # FIXME: rework prefill qty feature now we cannot have one
+                # move line with 2 units reserved and 1 unit picked.
+                move_line,
+                qty_done=self._get_prefill_qty(move_line),
             )
         else:
             response = self._list_move_lines(self.zone_location)
@@ -636,7 +640,7 @@ class ZonePicking(Component):
         if move_lines:
             if handle_complete_mix_pack:
                 response = self._response_for_set_line_destination(
-                    first(move_lines), qty_done=0
+                    first(move_lines), picked=False
                 )
                 return response, message
             if packaging.package_has_several_products(package):
@@ -654,6 +658,8 @@ class ZonePicking(Component):
                 )
 
             move_line = first(move_lines)
+            # FIXME: rework prefill qty feature now we cannot have one
+            # move line with 2 units reserved and 1 unit picked.
             qty_done = self._get_prefill_qty(move_line)
             response = self._response_for_set_line_destination(
                 move_line, qty_done=qty_done
@@ -680,6 +686,8 @@ class ZonePicking(Component):
                     package,
                     response_ok_func=functools.partial(
                         self._response_for_set_line_destination,
+                        # FIXME: rework prefill qty feature now we cannot have one
+                        # move line with 2 units reserved and 1 unit picked.
                         qty_done=self._get_prefill_qty(move_line, qty=0),
                     ),
                     response_error_func=self._response_for_change_pack_lot,
@@ -749,6 +757,8 @@ class ZonePicking(Component):
             )
         elif move_lines:
             move_line = first(move_lines)
+            # FIXME: rework prefill qty feature now we cannot have one
+            # move line with 2 units reserved and 1 unit picked.
             qty_done = self._get_prefill_qty(move_line, qty=(packaging.qty or 1.0))
             response = self._response_for_set_line_destination(
                 move_line, qty_done=qty_done
@@ -803,6 +813,8 @@ class ZonePicking(Component):
                 response = self.list_move_lines()
             else:
                 move_line = first(move_lines)
+                # FIXME: rework prefill qty feature now we cannot have one
+                # move line with 2 units reserved and 1 unit picked.
                 qty_done = self._get_prefill_qty(move_line, qty=1.0)
                 response = self._response_for_set_line_destination(
                     move_line, qty_done=qty_done
@@ -910,7 +922,10 @@ class ZonePicking(Component):
             return self._response_for_set_line_destination(
                 move_line,
                 message=self.msg_store.dest_location_not_allowed(),
-                qty_done=quantity,
+                # FIXME: split move line now we cannot have one
+                # move line with 2 units reserved and 1 unit picked?
+                # qty_done=quantity,
+                picked=True,
             )
 
         if confirmation != barcode and self.is_dest_location_to_confirm(
@@ -922,7 +937,10 @@ class ZonePicking(Component):
                     move_line.location_dest_id, location
                 ),
                 confirmation_required=barcode,
-                qty_done=quantity,
+                # FIXME: split move line now we cannot have one
+                # move line with 2 units reserved and 1 unit picked?
+                # qty_done=quantity,
+                picked=True,
             )
 
         # If no destination package
@@ -930,7 +948,10 @@ class ZonePicking(Component):
             return self._response_for_set_line_destination(
                 move_line,
                 message=self.msg_store.dest_package_required(),
-                qty_done=quantity,
+                # FIXME: split move line now we cannot have one
+                # move line with 2 units reserved and 1 unit picked?
+                # qty_done=quantity,
+                picked=True,
             )
 
     def _set_destination_location(
@@ -952,14 +973,19 @@ class ZonePicking(Component):
             for _move_line in package.move_line_ids:
                 if _move_line.state not in ("assigned", "partially_available"):
                     continue
-                _move_line.qty_done = move_line.quantity
+                # FIXME: check this now we cannot have one
+                # move line with 2 units reserved and 1 unit picked?
+                # _move_line.qty_done = move_line.quantity
+                _move_line.picked = True
                 move_lines |= _move_line
         self._write_destination_on_lines(move_lines, location)
 
         try:
             stock.mark_move_line_as_picked(move_lines, quantity, check_user=True)
         except ConcurentWorkOnTransfer as error:
-            values = {"qty_done": quantity} if quantity is not None else {}
+            # FIXME: check this now we cannot have one
+            # move line with 2 units reserved and 1 unit picked?
+            values = {"picked": True} if quantity is not None else {}
             response = self._response_for_set_line_destination(
                 move_line,
                 message={
@@ -1024,7 +1050,7 @@ class ZonePicking(Component):
         package_invalid_message = self._is_package_not_valid(package)
         if package_invalid_message:
             response = self._response_for_set_line_destination(
-                move_line, message=package_invalid_message, qty_done=quantity
+                move_line, message=package_invalid_message, picked=True
             )
             return (package_changed, response)
         # the quantity done is set to the passed quantity
@@ -1035,7 +1061,7 @@ class ZonePicking(Component):
             response = self._response_for_set_line_destination(
                 move_line,
                 message=self.msg_store.unable_to_pick_more(move_line.quantity),
-                qty_done=quantity,
+                picked=True,
             )
             return (package_changed, response)
         stock = self._actions_for("stock")
@@ -1051,7 +1077,7 @@ class ZonePicking(Component):
                     "message_type": "error",
                     "body": str(error),
                 },
-                qty_done=quantity,
+                picked=True,
             )
             return (package_changed, response)
         package_changed = True
@@ -1067,6 +1093,8 @@ class ZonePicking(Component):
 
     def _set_destination_update_quantity(self, move_line, quantity, barcode):
         """Handle the done quantity increment on set_destination end point."""
+        # FIXME: rework prefill qty feature now we cannot have one
+        # move line with 2 units reserved and 1 unit picked.
         response = None
         if not self.work.menu.no_prefill_qty:
             return response
@@ -1149,7 +1177,7 @@ class ZonePicking(Component):
           moved is 0 in the source location after the move (beware: at this
           point the product we put in the buffer is still considered to be in
           the source location, so we have to compute the source location's
-          quantity - qty_done).
+          quantity - quantity_done).
         * set_line_destination: the scanned location is invalid, user has to
           scan another one
         * set_line_destination+confirmation_required: the scanned location is not
@@ -1172,6 +1200,8 @@ class ZonePicking(Component):
             return self._response_for_set_line_destination(
                 move_line,
                 message=message,
+                # FIXME: rework prefill qty feature now we cannot have one
+                # move line with 2 units reserved and 1 unit picked.
                 qty_done=self._get_prefill_qty(move_line, qty=0),
             )
 
@@ -1349,7 +1379,7 @@ class ZonePicking(Component):
             ("package_id", "=", package.id),
             ("lot_id", "=", lot.id),
             ("state", "not in", ("cancel", "done")),
-            ("qty_done", "=", 0),
+            ("picked", "=", False),
         ]
         return domain
 
@@ -1360,11 +1390,11 @@ class ZonePicking(Component):
         because there is physically not enough goods. The move line is deleted
         (unreserve), and an inventory is created to reduce the quantity in the
         source location to prevent future errors until a correction. Beware:
-        the quantity already reserved and having a qty_done set on other lines
+        the quantity already reserved and having a quantity picked on other lines
         in the same location should remain reserved so the inventory's quantity
-        must be set to the total of qty_done of other lines.
+        must be set to the total of quantity picked of other lines.
 
-        The other lines not yet picked (no qty_done) in the same location for
+        The other lines not yet picked in the same location for
         the same product, lot, package are unreserved as well (moves lines
         deleted, which unreserve their quantity on the move).
 
@@ -1442,6 +1472,8 @@ class ZonePicking(Component):
         # and related parameters for zone picking scenario
         response_ok_func = functools.partial(
             self._response_for_set_line_destination,
+            # FIXME: rework prefill qty feature now we cannot have one
+            # move line with 2 units reserved and 1 unit picked.
             qty_done=self._get_prefill_qty(move_line),
         )
         response_error_func = functools.partial(self._response_for_change_pack_lot)
@@ -1480,7 +1512,7 @@ class ZonePicking(Component):
 
         * in the current zone location and picking type
         * not done or canceled
-        * with a qty_done > 0
+        * with a quantity picked
         * have a destination package
         * with ``shopfloor_user_id`` equal to the current user
 

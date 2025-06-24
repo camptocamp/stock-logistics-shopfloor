@@ -140,9 +140,11 @@ class DeliveryCommonCase(CommonCase):
             assert len(move_lines) == len(qties), "'qties' doesn't match 'move_lines'"
             expected_qties = []
             for qty in qties:
-                expected_qties.append({"qty_done": qty})
+                expected_qties.append({"quantity": qty, "picked": True})
         else:
-            expected_qties = [{"qty_done": line.quantity} for line in move_lines]
+            expected_qties = [
+                {"quantity": line.quantity, "picked": True} for line in move_lines
+            ]
         self.assertRecordValues(move_lines, expected_qties)
         package_level = move_lines.package_level_id
         if package_level:

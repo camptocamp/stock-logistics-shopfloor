@@ -53,7 +53,7 @@ class ClusterPickingCommonCase(CommonCase, PickingBatchMixin):
         for line in move_lines:
             line.write(
                 {
-                    "qty_done": line.quantity,
+                    "picked": True,
                     "result_package_id": dest_package.id,
                 }
             )

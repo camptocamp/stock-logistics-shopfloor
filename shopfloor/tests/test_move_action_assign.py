@@ -35,7 +35,7 @@ class TestStockMoveActionAssign(CommonCase):
         An override of ``StockPicking._check_move_lines_map_quant_package()`` ensures
         that we ignore:
 
-        * picked lines (qty_done > 0)
+        * picked lines
         * lines with a different result package already
         """
         package = self.env["stock.quant.package"].create({"name": "Src Pack"})
@@ -56,7 +56,8 @@ class TestStockMoveActionAssign(CommonCase):
         line = move.move_line_ids
 
         # we are no longer moving the entire package
-        line.qty_done = 20
+        line.quantity = 20
+        line.picked = True
         line.result_package_id = dest_package1
 
         # create remaining quantity
@@ -81,7 +82,15 @@ class TestStockMoveActionAssign(CommonCase):
         self.assertRecordValues(
             line + new_line,
             [
-                {"qty_done": 20, "result_package_id": dest_package1.id},
-                {"qty_done": 0, "result_package_id": new_package.id},
+                {
+                    "quantity": 20,
+                    "picked": True,
+                    "result_package_id": dest_package1.id,
+                },
+                {
+                    "quantity": 0,
+                    "picked": False,
+                    "result_package_id": new_package.id,
+                },
             ],
         )

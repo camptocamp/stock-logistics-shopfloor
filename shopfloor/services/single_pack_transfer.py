@@ -118,7 +118,7 @@ class SinglePackTransfer(Component):
                     ("state", "in", ("assigned", "partially_available")),
                 ]
             )
-            if any(line.qty_done > 0 for line in other_move_lines) or (
+            if any(line.picked for line in other_move_lines) or (
                 other_move_lines and not self.work.menu.allow_unreserve_other_moves
             ):
                 picking = fields.first(other_move_lines).picking_id

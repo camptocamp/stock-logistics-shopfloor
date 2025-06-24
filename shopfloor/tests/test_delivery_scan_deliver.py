@@ -189,6 +189,7 @@ class DeliveryScanDeliverCase(DeliveryCommonCase):
 
     def test_scan_deliver_scan_product_not_in_package(self):
         """Check scanning product increment quantity done by one."""
+        # FIXME: check this now we cannot increment qty_done
         for qty_done in range(1, 3):
             response = self.service.dispatch(
                 "scan_deliver",
@@ -364,7 +365,7 @@ class DeliveryScanDeliverCase(DeliveryCommonCase):
             "scan_deliver", params={"barcode": self.packaging.barcode}
         )
         self.assert_response_deliver(response, picking=self.picking)
-        self.assertEqual(line.qty_done, self.packaging.qty)
+        self.assertEqual(line.quantity_picked, self.packaging.qty)
 
     def test_scan_deliver_scan_product_packaging_with_prepackaged_product(self):
         """Check scanning a product packaging use the packaging quantity.
@@ -383,7 +384,7 @@ class DeliveryScanDeliverCase(DeliveryCommonCase):
         self.assert_response_deliver(
             response, message=self.service.msg_store.transfer_complete(self.picking)
         )
-        self.assertEqual(line.qty_done, self.packaging.qty)
+        self.assertEqual(line.quantity_picked, self.packaging.qty)
 
     def test_scan_deliver_scan_product_packaging_partial_qty(self):
         # Scan a product packaging with a smaller qty than the move line
@@ -398,7 +399,7 @@ class DeliveryScanDeliverCase(DeliveryCommonCase):
             "scan_deliver", params={"barcode": self.packaging.barcode}
         )
         self.assert_response_deliver(response, picking=self.picking)
-        self.assertEqual(line.qty_done, self.packaging.qty)
+        self.assertEqual(line.quantity_picked, self.packaging.qty)
         self.assertTrue(line.move_id.product_qty > self.packaging.qty)
         # Process the remaining qties, still by scanning the packaging
         response = self.service.dispatch(
@@ -428,7 +429,7 @@ class DeliveryScanDeliverCase(DeliveryCommonCase):
             response,
             message=self.service.msg_store.transfer_complete(self.picking),
         )
-        self.assertEqual(line.qty_done, self.packaging.qty)
+        self.assertEqual(line.quantity_picked, self.packaging.qty)
         self.assertEqual(line.move_id.product_qty, self.packaging.qty)
         self.assertEqual(line.move_id.state, "done")
         self.assertTrue(self.picking.backorder_ids)
@@ -688,7 +689,7 @@ class DeliveryScanDeliverSpecialCase(DeliveryCommonCase):
         picking = self._create_picking(lines=[(self.product_a, 10)])
         self._fill_stock_for_moves(picking.move_ids, in_package=True)
         picking.action_assign()
-        picking.move_line_ids.qty_done = picking.move_line_ids.quantity
+        picking.move_line_ids.picked = True
         picking._action_done()
         response = self.service.dispatch(
             "scan_deliver", params={"barcode": picking.name}

@@ -110,7 +110,7 @@ class StockAction(Component):
     def mark_move_line_as_picked(
         self, move_lines, quantity=None, package=None, user=None, check_user=False
     ):
-        """Set the qty_done and extract lines in new order"""
+        """Set the picked quantity and extract lines in new order"""
         user = user or self.env.user
         if check_user:
             picking_users = move_lines.picking_id.user_id
@@ -120,9 +120,9 @@ class StockAction(Component):
                 )
         for line in move_lines:
             qty_done = quantity if quantity is not None else line.quantity
-            line.qty_done = qty_done
-            line._split_partial_quantity()
+            line._split_partial_quantity(qty_done)
             data = {
+                "picked": True,
                 "shopfloor_user_id": user.id,
             }
             if package:
@@ -143,7 +143,7 @@ class StockAction(Component):
         move_lines.write(
             {
                 "shopfloor_user_id": False,
-                "qty_done": 0,
+                "picked": False,
                 "result_package_id": False,
             }
         )

@@ -165,7 +165,8 @@ class ZonePickingSetLineDestinationCase(ZonePickingCommonCase):
         # Check picking data
         moves_after = self.picking1.move_ids
         self.assertEqual(moves_before, moves_after)
-        self.assertEqual(move_line.qty_done, 10)
+        self.assertEqual(move_line.quantity, 10)
+        self.assertTrue(move_line.picked)
         # Check response
         move_lines = self.service._find_location_move_lines()
         move_lines = move_lines.sorted(lambda x: x.move_id.priority, reverse=True)
@@ -277,7 +278,8 @@ class ZonePickingSetLineDestinationCase(ZonePickingCommonCase):
         self.assertEqual(move_after.product_uom_qty, 4)
         self.assertEqual(move_after.state, "assigned")
         self.assertEqual(move_after.move_line_ids.quantity, 4)
-        self.assertEqual(move_line.qty_done, 6)
+        self.assertEqual(move_line.quantity, 6)
+        self.assertTrue(move_line.picked)
         self.assertNotEqual(move_line.move_id, other_move_line.move_id)
         # Check response
         move_lines = self.service._find_location_move_lines()
@@ -407,7 +409,7 @@ class ZonePickingSetLineDestinationCase(ZonePickingCommonCase):
                 {
                     "result_package_id": self.free_package.id,
                     "quantity": 10,
-                    "qty_done": 10,
+                    "picked": True,
                     "shopfloor_user_id": self.env.user.id,
                 },
             ],
@@ -465,7 +467,7 @@ class ZonePickingSetLineDestinationCase(ZonePickingCommonCase):
                 {
                     "result_package_id": self.free_package.id,
                     "quantity": 6,
-                    "qty_done": 6,
+                    "picked": True,
                     "shopfloor_user_id": self.env.user.id,
                 },
             ],
@@ -476,7 +478,7 @@ class ZonePickingSetLineDestinationCase(ZonePickingCommonCase):
                 {
                     "result_package_id": new_move_line.package_id.id,  # Unchanged
                     "quantity": 4,
-                    "qty_done": 0,
+                    "picked": True,
                     "shopfloor_user_id": False,
                 },
             ],
