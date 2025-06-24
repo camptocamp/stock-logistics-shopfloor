@@ -29,36 +29,34 @@ class StockMoveLine(models.Model):
     # allow domain on picking_id.xxx without too much perf penalty
     picking_id = fields.Many2one(auto_join=True)
 
-    qty_done = fields.Float(compute="_compute_qty_done")
+    quantity_picked = fields.Float(compute="_compute_quantity_picked")
 
     # TODO: only to ease parsers
     # remove from any logic?
-    def _compute_qty_done(self):
+    def _compute_quantity_picked(self):
         for line in self:
-            line.qty_done = line.quantity if line.picked else 0.0
+            line.quantity_picked = line.quantity if line.picked else 0.0
 
-    def _split_partial_quantity(self):
+    def _split_partial_quantity(self, qty_done):
         """Create new move line for the quantity remaining to do
 
         :return: the new move line if created else empty recordset
         """
         self.ensure_one()
         rounding = self.product_uom_id.rounding
-        if float_is_zero(self.qty_done, precision_rounding=rounding):
+        if float_is_zero(qty_done, precision_rounding=rounding):
             return self.browse()
-        compare = float_compare(
-            self.qty_done, self.quantity, precision_rounding=rounding
-        )
+        compare = float_compare(qty_done, self.quantity, precision_rounding=rounding)
         qty_lesser = compare == -1
         qty_greater = compare == 1
         assert not qty_greater, "Quantity done cannot exceed quantity to do"
         if qty_lesser:
-            remaining = self.quantity - self.qty_done
-            new_line = self.copy({"quantity": remaining, "qty_done": 0})
+            remaining = self.quantity - qty_done
+            new_line = self.copy({"quantity": remaining, "picked": False})
             # if we didn't bypass reservation update, the quant reservation
             # would be reduced as much as the deduced quantity, which is wrong
             # as we only moved the quantity to a new move line
-            self.with_context(bypass_reservation_update=True).quantity = self.qty_done
+            self.with_context(bypass_reservation_update=True).quantity = self.quantity
             return new_line
         return self.browse()
 
@@ -312,7 +310,7 @@ class StockMoveLine(models.Model):
     def shopfloor_postpone(self, *recordsets):
         """
         Specific behavior for move lines.
-        As we need to reset qty_done.
+        As we need to reset the quantity picked.
 
         """
         res = super().shopfloor_postpone(*recordsets)

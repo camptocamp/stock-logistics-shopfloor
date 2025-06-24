@@ -214,13 +214,16 @@ class ActionsDataCase(ActionsDataCaseBase):
         result_package = self.env["stock.quant.package"].create(
             {"product_packaging_id": self.packaging.id}
         )
-        move_line.write({"qty_done": 3.0, "result_package_id": result_package.id})
+        move_line.write(
+            {"quantity": 3.0, "picked": True, "result_package_id": result_package.id}
+        )
         data = self.data.move_line(move_line)
         self.assert_schema(self.schema.move_line(), data)
         self.assertIn(self.move_a.state, ["partially_available", "assigned", "done"])
         expected = {
             "id": move_line.id,
-            "qty_done": 3.0,
+            "picked": True,
+            "quantity_picked": move_line.quantity,
             "quantity": move_line.quantity,
             "product": self._expected_product(self.product_a),
             "lot": None,
@@ -256,7 +259,8 @@ class ActionsDataCase(ActionsDataCaseBase):
         self.assert_schema(self.schema.move_line(), data)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product(self.product_b),
             "lot": {
@@ -280,7 +284,8 @@ class ActionsDataCase(ActionsDataCaseBase):
         self.assertIn(self.move_a.state, ["partially_available", "assigned", "done"])
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product(self.product_c),
             "lot": {
@@ -324,7 +329,8 @@ class ActionsDataCase(ActionsDataCaseBase):
         self.assert_schema(self.schema.move_line(), data)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product(self.product_d),
             "lot": None,
@@ -342,7 +348,8 @@ class ActionsDataCase(ActionsDataCaseBase):
         self.assert_schema(self.schema.move_line(with_picking=True), data)
         expected = {
             "id": move_line.id,
-            "qty_done": 0.0,
+            "picked": False,
+            "quantity_picked": 0,
             "quantity": move_line.quantity,
             "product": self._expected_product(self.product_d),
             "lot": None,

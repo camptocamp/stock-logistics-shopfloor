@@ -186,7 +186,7 @@ class LocationContentTransfer(Component):
             self._domain_recover_pickings()
         )
         started_pickings = candidate_pickings.filtered(
-            lambda picking: any(line.qty_done for line in picking.move_line_ids)
+            lambda picking: any(line.picked for line in picking.move_line_ids)
         )
         return started_pickings
 
@@ -416,7 +416,7 @@ class LocationContentTransfer(Component):
         return [
             ("location_id", "=", location.id),
             ("state", "in", ("assigned", "partially_available")),
-            ("qty_done", ">", 0),
+            ("picked", "=", True),
             # TODO check generated SQL
             ("picking_id.user_id", "=", self.env.uid),
         ]
@@ -762,6 +762,8 @@ class LocationContentTransfer(Component):
 
         self._lock_lines(move_line)
 
+        # FIXME: split move line now we cannot have one
+        # move line with 2 units reserved and 1 unit picked?
         move_line.qty_done = quantity
         self._write_destination_on_lines(move_line, scanned_location)
 
@@ -770,7 +772,7 @@ class LocationContentTransfer(Component):
         backorders = stock.validate_moves(move_line.move_id)
         if backorders:
             for move_line in backorders.mapped("move_line_ids"):
-                move_line.qty_done = move_line.quantity
+                move_line.picked = True
             backorders.user_id = self.env.user
             # process first backorder of current line
             move_lines = backorders.move_line_ids
@@ -858,9 +860,8 @@ class LocationContentTransfer(Component):
             # split the move to process only the lines related to the package.
             package_move.split_other_move_lines(package_move_lines)
             lot = package_move.move_line_ids.lot_id
-            # We need to set qty_done at 0 because otherwise
-            # the move_line will not be deleted
-            package_move.move_line_ids.write({"qty_done": 0})
+            # We need to unpick because otherwise the move_line will not be deleted
+            package_move.move_line_ids.write({"picked": False})
             package = package_level.package_id
             if (
                 self.is_allow_move_create()
@@ -912,9 +913,8 @@ class LocationContentTransfer(Component):
         move = move_line.move_id
         package = move_line.package_id
         lot = move_line.lot_id
-        # We need to set qty_done at 0 because otherwise
-        # the move_line will not be deleted
-        move_line.qty_done = 0
+        # We need to unpick because otherwise the move_line will not be deleted
+        move_line.picked = False
         if self.is_allow_move_create() and self.env.user == move.picking_id.create_uid:
             # Owned by the user deleting the move
             move._action_cancel()

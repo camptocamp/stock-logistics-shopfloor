@@ -57,7 +57,7 @@ class StockPicking(models.Model):
         pack_move_lines = self.move_line_ids.filtered(
             lambda ml: ml.package_id == package
         )
-        # if we set a qty_done on any line, it's picked, we don't want
+        # if we flag a line as picked, we don't want
         # to change it in any case, so we ignore the package level
         if any(pack_move_lines.mapped("picked")):
             return False

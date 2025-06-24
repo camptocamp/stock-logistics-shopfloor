@@ -32,7 +32,8 @@ class ShopfloorSchemaAction(Component):
     def move_line(self, with_packaging=False, with_picking=False):
         schema = {
             "id": {"type": "integer", "required": True},
-            "qty_done": {"type": "float", "required": True},
+            "picked": {"type": "boolean", "nullable": False, "required": True},
+            "quantity_picked": {"type": "float", "required": True},
             "quantity": {"type": "float", "required": True},
             "product": self._schema_dict_of(self.product()),
             "lot": {

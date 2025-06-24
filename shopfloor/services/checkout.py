@@ -426,9 +426,11 @@ class Checkout(Component):
                 continue
             if self.work.menu.no_prefill_qty and i == 0:
                 # For prefill quantity we only want to increment one line
+                # FIXME: rework prefill qty feature now we cannot have one
+                # move line with 2 units reserved and 1 unit picked.
                 line.qty_done += prefill_qty
             elif not self.work.menu.no_prefill_qty:
-                line.qty_done = line.quantity
+                line.picked = True
             line.shopfloor_user_id = self.env.user
 
         picking = lines.mapped("picking_id")
@@ -440,7 +442,7 @@ class Checkout(Component):
 
     def _deselect_lines(self, lines):
         lines.filtered(lambda x: not x.shopfloor_checkout_done).write(
-            {"qty_done": 0, "shopfloor_user_id": False}
+            {"picked": False, "shopfloor_user_id": False}
         )
 
     def scan_line(self, picking_id, barcode, confirm_pack_all=False, confirm_lot=None):
@@ -454,8 +456,7 @@ class Checkout(Component):
         several packs contain it, the endpoint will ask to scan a pack; if the
         product is tracked by lot, to scan a lot.
 
-        Once move lines are found, their ``qty_done`` is set to their reserved
-        quantity.
+        Once move lines are found, their ``picked`` flag is set.
 
         Transitions:
         * select_line: nothing could be found for the barcode
@@ -842,15 +843,9 @@ class Checkout(Component):
                         split_partial=False,
                         result_package_id=False,
                     )
-                move_line.qty_done = qty_done
+                move_line.picked = bool(qty_done)
                 if new_line:
                     selected_line_ids.append(new_line.id)
-                if qty_done > move_line.quantity:
-                    return self._response_for_select_package(
-                        picking,
-                        self.env["stock.move.line"].browse(selected_line_ids).exists(),
-                        message=self.msg_store.line_scanned_qty_done_higher_than_allowed(),
-                    )
         return self._response_for_select_package(
             picking,
             self.env["stock.move.line"].browse(selected_line_ids).exists(),
@@ -858,7 +853,7 @@ class Checkout(Component):
         )
 
     def reset_line_qty(self, picking_id, selected_line_ids, move_line_id):
-        """Reset qty_done of a move line to zero
+        """Reset picked quantity of a move line.
 
         Used to deselect a line in the "select_package" screen.
         The selected_line_ids parameter is used to keep the selection of lines
@@ -873,7 +868,7 @@ class Checkout(Component):
         )
 
     def set_line_qty(self, picking_id, selected_line_ids, move_line_id):
-        """Set qty_done of a move line to its reserved quantity
+        """Set a move line as picked.
 
         Used to select a line in the "select_package" screen.
         The selected_line_ids parameter is used to keep the selection of lines
@@ -888,7 +883,7 @@ class Checkout(Component):
         )
 
     def set_custom_qty(self, picking_id, selected_line_ids, move_line_id, qty_done):
-        """Change qty_done of a move line with a custom value
+        """Change quantity done of a move line with a custom value
 
         The selected_line_ids parameter is used to keep the selection of lines
         stateless.
@@ -901,14 +896,14 @@ class Checkout(Component):
             picking_id, selected_line_ids, [move_line_id], lambda __: qty_done
         )
 
-    def _switch_line_qty_done(self, picking, selected_lines, switch_lines):
-        """Switch qty_done on lines and return to the 'select_package' state
+    def _switch_line_picked(self, picking, selected_lines, switch_lines):
+        """Switch picked flag on lines and return to the 'select_package' state
 
-        If at least one of the lines to switch has a qty_done, set them all
-        to zero. If all the lines to switch have a zero qty_done, switch them
-        to their quantity to deliver.
+        If at least one of the lines to switch is picked, set them all
+        to zero. If all the lines to switch are not picked, switch them
+        to picked.
         """
-        if any(line.qty_done for line in switch_lines):
+        if any(line.picked for line in switch_lines):
             return self._change_line_qty(
                 picking.id, selected_lines.ids, switch_lines.ids, lambda __: 0
             )
@@ -923,7 +918,7 @@ class Checkout(Component):
     def _increment_custom_qty(
         self, picking, selected_lines, increment_lines, qty_increment
     ):
-        """Increment the  qty_done of a move line with a custom value
+        """Increment the picked quantity of a move line with a custom value
 
         The selected_line parameter is used to keep the selection of lines
         stateless.
@@ -936,22 +931,22 @@ class Checkout(Component):
             picking.id,
             selected_lines.ids,
             increment_lines.ids,
-            lambda line: line.qty_done + qty_increment,
+            lambda line: line.quantity_picked + qty_increment,
         )
 
     @staticmethod
     def _filter_lines_unpacked(move_line):
         return (
-            move_line.qty_done == 0 or move_line.shopfloor_user_id
+            not move_line.picked or move_line.shopfloor_user_id
         ) and not move_line.shopfloor_checkout_done
 
     @staticmethod
     def _filter_lines_to_pack(move_line):
-        return move_line.qty_done > 0 and not move_line.shopfloor_checkout_done
+        return move_line.picked and not move_line.shopfloor_checkout_done
 
     @staticmethod
     def _filter_lines_checkout_done(move_line):
-        return move_line.qty_done > 0 and move_line.shopfloor_checkout_done
+        return move_line.picked and move_line.shopfloor_checkout_done
 
     def _is_package_allowed(self, picking, package):
         """Check if a package is allowed as a destination/delivery package.
@@ -966,7 +961,7 @@ class Checkout(Component):
         return package in existing_packages
 
     def _put_lines_in_package(self, picking, selected_lines, package):
-        """Put the current selected lines with a qty_done in a package
+        """Put the current selected lines with a picked quantity in a package
 
         Note: only packages which are already a delivery package for another
         line of the stock picking can be selected. Packages which are the
@@ -982,9 +977,6 @@ class Checkout(Component):
         return self._pack_lines(picking, selected_lines, package)
 
     def _put_lines_in_allowed_package(self, picking, lines_to_pack, package):
-        for line in lines_to_pack:
-            if line.qty_done < line.quantity:
-                line._split_partial_quantity_to_be_done(line.qty_done, {})
         lines_to_pack.write(
             {"result_package_id": package.id, "shopfloor_checkout_done": True}
         )
@@ -1032,8 +1024,8 @@ class Checkout(Component):
         of a selected line, the package is set to be the destination package of
         all the lines to pack.
 
-        When a product is scanned, it selects (set qty_done = reserved qty) or
-        deselects (set qty_done = 0) the move lines for this product. Only
+        When a product is scanned, it selects (set picked = True) or
+        deselects (set picked = False) the move lines for this product. Only
         products not tracked by lot can use this.
 
         When a lot is scanned, it does the same as for the products but based
@@ -1043,7 +1035,7 @@ class Checkout(Component):
         package is created and set as destination of the lines to pack.
 
         Lines to pack are move lines in the list of ``selected_line_ids``
-        where ``qty_done`` > 0 and have not been packed yet
+        where ``picked`` is set and have not been packed yet
         (``shopfloor_checkout_done is False``).
 
         Transitions:
@@ -1103,6 +1095,8 @@ class Checkout(Component):
         which still has some qty todo.
         If none are found, return the first line for that product.
         """
+        # FIXME: rework prefill qty feature now we cannot have one
+        # move line with 2 units reserved and 1 unit picked.
         return next(
             (line for line in product_lines if line.qty_done < line.quantity),
             fields.first(product_lines),
@@ -1126,7 +1120,7 @@ class Checkout(Component):
                 self._find_line_to_increment(product_lines),
                 quantity_increment,
             )
-        return self._switch_line_qty_done(picking, selected_lines, product_lines)
+        return self._switch_line_picked(picking, selected_lines, product_lines)
 
     def _scan_package_action_from_packaging(
         self, picking, selected_lines, packaging, **kw
@@ -1141,7 +1135,7 @@ class Checkout(Component):
             return self._increment_custom_qty(
                 picking, selected_lines, self._find_line_to_increment(lot_lines), 1
             )
-        return self._switch_line_qty_done(picking, selected_lines, lot_lines)
+        return self._switch_line_picked(picking, selected_lines, lot_lines)
 
     def _scan_package_action_from_serial(self, picking, selection_lines, lot, **kw):
         # Search serial number is actually the same as searching for lot (as of v14...)
@@ -1221,9 +1215,6 @@ class Checkout(Component):
                 selected_lines,
                 message=self.msg_store.no_delivery_packaging_available(),
             )
-        response = self._check_allowed_qty_done(picking, selected_lines)
-        if response:
-            return response
         return self._response_for_select_delivery_packaging(picking, delivery_packaging)
 
     def new_package(self, picking_id, selected_line_ids, package_type_id=None):
@@ -1233,7 +1224,7 @@ class Checkout(Component):
         the selected lines.
 
         Selected lines are move lines in the list of ``move_line_ids`` where
-        ``qty_done`` > 0 and have no destination package
+        ``picked`` is set and have no destination package
         (shopfloor_checkout_done is False).
 
         Transitions:
@@ -1253,7 +1244,7 @@ class Checkout(Component):
         """Process all selected lines without any package.
 
         Selected lines are move lines in the list of ``move_line_ids`` where
-        ``qty_done`` > 0 and have no destination package
+        ``picked`` is set and have no destination package
         (shopfloor_checkout_done is False).
 
         Transitions:
@@ -1266,15 +1257,10 @@ class Checkout(Component):
         if message:
             return self._response_for_select_document(message=message)
         selected_lines = self.env["stock.move.line"].browse(selected_line_ids).exists()
-        selected_lines_with_qty_done = selected_lines.filtered(
-            lambda line: line.qty_done > 0
-        )
-        selected_lines_with_qty_done.write(
+        picked_selected_lines = selected_lines.filtered(lambda line: line.picked)
+        picked_selected_lines.write(
             {"shopfloor_checkout_done": True, "result_package_id": False}
         )
-        response = self._check_allowed_qty_done(picking, selected_lines)
-        if response:
-            return response
         return self._response_for_select_line(
             picking,
             message={
@@ -1298,24 +1284,7 @@ class Checkout(Component):
         if message:
             return self._response_for_select_document(message=message)
         lines = self.env["stock.move.line"].browse(selected_line_ids).exists()
-        response = self._check_allowed_qty_done(picking, lines)
-        if response:
-            return response
         return self._response_for_select_dest_package(picking, lines)
-
-    def _check_allowed_qty_done(self, picking, lines):
-        for line in lines:
-            # Do not allow to proceed if the qty_done of
-            # any of the selected lines
-            # is higher than the quantity to do.
-            if line.qty_done > line.quantity:
-                return self._response_for_select_package(
-                    picking,
-                    lines,
-                    message=self.msg_store.selected_lines_qty_done_higher_than_allowed(
-                        line
-                    ),
-                )
 
     def _set_dest_package_from_selection(self, picking, selected_lines, package):
         if not self._is_package_allowed(picking, package):
@@ -1329,7 +1298,7 @@ class Checkout(Component):
     def scan_dest_package(self, picking_id, selected_line_ids, barcode):
         """Scan destination package for lines
 
-        Set the destination package on the selected lines with a `qty_done` if
+        Set the destination package on the `picked` selected lines if
         the package is valid. It is valid when one of:
 
         * it is already the destination package of another line of the stock.picking
@@ -1459,7 +1428,7 @@ class Checkout(Component):
 
         All the move lines with the package as ``result_package_id`` have their
         ``result_package_id`` reset to the source package (default odoo behavior)
-        and their ``qty_done`` set to 0.
+        and their ``picked`` set to `False`.
 
         It flags ``shopfloor_checkout_done`` to False
         so they have to be processed again.
@@ -1488,14 +1457,14 @@ class Checkout(Component):
             for move_line in move_lines:
                 move_line.write(
                     {
-                        "qty_done": 0,
+                        "picked": 0,
                         "result_package_id": move_line.package_id,
                         "shopfloor_checkout_done": False,
                     }
                 )
             msg = _("Package cancelled")
         if line:
-            line.write({"qty_done": 0, "shopfloor_checkout_done": False})
+            line.write({"picked": 0, "shopfloor_checkout_done": False})
             msg = _("Line cancelled")
         return self._response_for_select_line(
             picking, message={"message_type": "success", "body": msg}
@@ -1504,7 +1473,7 @@ class Checkout(Component):
     def done(self, picking_id, confirmation=False):
         """Set the moves as done
 
-        If some lines have not the full ``qty_done`` or no destination package set,
+        If some lines are not ``picked`` or no destination package set,
         a confirmation is asked to the user.
 
         Transitions:
@@ -1519,7 +1488,7 @@ class Checkout(Component):
             return self._response_for_select_document(message=message)
         lines = picking.move_line_ids
         if not confirmation:
-            if not all(line.qty_done == line.quantity for line in lines):
+            if not all(line.picked for line in lines):
                 return self._response_for_summary(
                     picking,
                     need_confirm=True,

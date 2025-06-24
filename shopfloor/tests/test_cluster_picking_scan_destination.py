@@ -56,7 +56,8 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             },
         )
         self.assertRecordValues(
-            line, [{"qty_done": qty_done, "result_package_id": self.bin1.id}]
+            line,
+            [{"quantity": qty_done, "picked": True, "result_package_id": self.bin1.id}],
         )
         self.assert_response(
             response,
@@ -64,7 +65,7 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             data=self._line_data(next_line),
             message={
                 "message_type": "success",
-                "body": f"{line.qty_done} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
+                "body": f"{line.quantity} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
             },
         )
 
@@ -90,7 +91,8 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             },
         )
         self.assertRecordValues(
-            line, [{"qty_done": qty_done, "result_package_id": self.bin2.id}]
+            line,
+            [{"quantity": qty_done, "picked": True, "result_package_id": self.bin2.id}],
         )
         data = self._data_for_batch(self.batch, self.packing_location)
         self.assert_response(
@@ -140,7 +142,7 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
                 "quantity": line.quantity,
             },
         )
-        self.assertRecordValues(line, [{"qty_done": 0, "result_package_id": False}])
+        self.assertRecordValues(line, [{"picked": False, "result_package_id": False}])
         self.assert_response(
             response,
             next_state="scan_destination",
@@ -177,7 +179,7 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             line,
             [
                 {
-                    "qty_done": 10,
+                    "picked": True,
                     "result_package_id": self.bin1.id,
                     "quantity": 10,
                 }
@@ -185,7 +187,7 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
         )
         self.assertRecordValues(
             new_line,
-            [{"qty_done": 0, "result_package_id": False, "quantity": 10}],
+            [{"picked": False, "result_package_id": False, "quantity": 10}],
         )
 
     def test_scan_destination_pack_bin_not_found(self):
@@ -267,17 +269,17 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             data=self._line_data(new_line),
             message={
                 "message_type": "success",
-                "body": f"{line.qty_done} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
+                "body": f"{line.quantity} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
             },
         )
 
         self.assertRecordValues(
             line,
-            [{"qty_done": 7, "result_package_id": self.bin1.id, "quantity": 7}],
+            [{"picked": True, "result_package_id": self.bin1.id, "quantity": 7}],
         )
         self.assertRecordValues(
             new_line,
-            [{"qty_done": 0, "result_package_id": False, "quantity": 3}],
+            [{"picked": False, "result_package_id": False, "quantity": 3}],
         )
         # the reserved quantity on the quant must stay the same
         self.assertRecordValues(quant, [{"quantity": 40.0, "reserved_quantity": 20.0}])
@@ -361,6 +363,6 @@ class ClusterPickingScanDestinationPackCase(ClusterPickingCommonCase):
             data=self._line_data(next_line),
             message={
                 "message_type": "success",
-                "body": f"{line.qty_done} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
+                "body": f"{line.quantity} {line.product_id.display_name} put in {self.bin1.name}",  # noqa
             },
         )
