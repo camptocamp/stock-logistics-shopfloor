@@ -31,7 +31,7 @@ class TestActionsChangePackageLot(CommonCase):
         picking_form.picking_type_id = self.picking_type
         picking_form.location_id = self.stock_location
         for package in packages:
-            with picking_form.package_level_ids_details.new() as move:
+            with picking_form.package_level_ids.new() as move:
                 move.package_id = package
         picking = picking_form.save()
         picking.action_confirm()
