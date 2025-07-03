@@ -286,7 +286,7 @@ class TestSelectLine(CommonCase):
             ],
             order="scheduled_date ASC, id ASC",
         )
-        message = "Transfer {} done".format(picking.name)
+        message = f"Transfer {picking.name} done"
         self.assert_response(
             response,
             next_state="select_document",
