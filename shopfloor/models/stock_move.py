@@ -50,6 +50,15 @@ class StockMove(models.Model):
                 qty_to_split = sum(to_move.mapped("quantity"))
             else:
                 qty_to_split = self.product_uom_qty - sum(move_lines.mapped("quantity"))
+            prec = self.env["decimal.precision"].precision_get(
+                "Product Unit of Measure"
+            )
+            # Do not split if we have full quantity to split
+            if (
+                float_compare(qty_to_split, self.product_uom_qty, precision_digits=prec)
+                == 0
+            ):
+                return self.browse()
             split_move_vals = self._split(qty_to_split)
             split_move = self.create(split_move_vals)
             split_move.move_line_ids = to_move
