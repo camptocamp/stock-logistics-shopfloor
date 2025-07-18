@@ -157,6 +157,7 @@ class StockAction(Component):
             {
                 "shopfloor_user_id": False,
                 "picked": False,
+                "qty_picked": 0,
                 "result_package_id": False,
             }
         )
