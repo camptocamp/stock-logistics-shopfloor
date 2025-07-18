@@ -1,7 +1,7 @@
 # Copyright 2020 Camptocamp SA (http://www.camptocamp.com)
 # Copyright 2022 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.tools.float_utils import float_compare
 
 
@@ -12,10 +12,14 @@ class StockMove(models.Model):
 
     # TODO: only to ease parsers
     # remove from any logic?
+    @api.depends("move_line_ids.quantity", "move_line_ids.qty_picked")
     def _compute_quantity_done(self):
         for move in self:
+            fname_to_sum = "quantity"
+            if any(ml.qty_picked for ml in move.move_line_ids):
+                fname_to_sum = "qty_picked"
             move.quantity_done = (
-                sum(move.move_line_ids.filtered("picked").mapped("quantity")) or 0.0
+                sum(ml[fname_to_sum] for ml in move.move_line_ids) or 0.0
             )
 
     def _qty_is_satisfied(self):
