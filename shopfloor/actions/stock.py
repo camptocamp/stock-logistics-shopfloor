@@ -28,7 +28,7 @@ class StockAction(Component):
             if move.state in ("partially_available", "assigned"):
                 quantity -= sum(move.move_line_ids.mapped("quantity_product_uom"))
             elif move.state in ("done"):
-                quantity -= move.product_uom_qty
+                quantity -= move.quantity
         return float_round(
             quantity, precision_rounding=origin_move.product_id.uom_id.rounding
         )
