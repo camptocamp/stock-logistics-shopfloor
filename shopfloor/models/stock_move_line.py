@@ -30,6 +30,7 @@ class StockMoveLine(models.Model):
     picking_id = fields.Many2one(auto_join=True)
 
     quantity_picked = fields.Float(compute="_compute_quantity_picked")
+    is_shopfloor_created = fields.Boolean()
 
     # TODO: only to ease parsers
     # remove from any logic?
