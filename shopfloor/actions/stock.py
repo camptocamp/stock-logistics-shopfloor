@@ -26,7 +26,8 @@ class StockAction(Component):
             ):
                 continue
             if move.state in ("partially_available", "assigned"):
-                quantity -= sum(move.move_line_ids.mapped("quantity_product_uom"))
+                # TODO: Add a test hitting this line
+                quantity -= sum(move.move_line_ids.mapped("quantity"))
             elif move.state in ("done"):
                 quantity -= move.quantity
         return float_round(
