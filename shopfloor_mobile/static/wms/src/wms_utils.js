@@ -35,8 +35,8 @@ export class WMSUtils {
             const title = options.group_no_title
                 ? ""
                 : options.name_prefix
-                ? options.name_prefix + ": " + location.name
-                : location.name;
+                  ? options.name_prefix + ": " + location.name
+                  : location.name;
             res.push({
                 _is_group: true,
                 key: loc_id,
@@ -111,8 +111,8 @@ export class WMSUtils {
             const title = options.group_no_title
                 ? ""
                 : options.name_prefix
-                ? options.name_prefix + ": " + product.name
-                : product.name;
+                  ? options.name_prefix + ": " + product.name
+                  : product.name;
             res.push({
                 _is_group: true,
                 key: prod_id,
