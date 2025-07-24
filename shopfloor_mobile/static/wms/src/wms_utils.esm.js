@@ -33,11 +33,12 @@ export class WMSUtils {
         // TODO: grouped.forEach?
         _.forEach(grouped, function (value, loc_id) {
             const location = _.first(_.filter(locations, {id: parseInt(loc_id, 10)}));
-            const title = options.group_no_title
-                ? ""
-                : options.name_prefix
-                  ? options.name_prefix + ": " + location.name
-                  : location.name;
+            let title = location.name;
+            if (options.group_no_title) {
+                title = "";
+            } else if (options.name_prefix) {
+                title = options.name_prefix + ": " + location.name;
+            }
             res.push({
                 _is_group: true,
                 key: loc_id,
@@ -109,11 +110,12 @@ export class WMSUtils {
         const grouped = _.groupBy(lines, "product.id");
         _.forEach(grouped, function (value, prod_id) {
             const product = _.first(_.filter(products, {id: parseInt(prod_id, 10)}));
-            const title = options.group_no_title
-                ? ""
-                : options.name_prefix
-                  ? options.name_prefix + ": " + product.name
-                  : product.name;
+            let title = product.name;
+            if (options.group_no_title) {
+                title = "";
+            } else if (options.name_prefix) {
+                title = `${options.name_prefix}: ${product.name}`;
+            }
             res.push({
                 _is_group: true,
                 key: prod_id,
