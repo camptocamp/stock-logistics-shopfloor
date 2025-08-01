@@ -211,25 +211,24 @@ class Delivery(Component):
         if product_qty:  # defined with lot/product/packaging scan
             # With a product_qty we process only one move line,
             # so one move to deal with regarding the qty
-            qty_done = lines.move_id.product_id.uom_id._compute_quantity(
+            qty_picked = lines.move_id.product_id.uom_id._compute_quantity(
                 product_qty, lines.move_id.product_uom
             )
-            lines.qty_done += qty_done
+            for line in lines:
+                line._pick_qty(line.qty_picked + qty_picked)
             return self._action_picking_done(
                 lines.picking_id, force=allow_prepackaged_product
             )
         for line in lines:
             # note: the package level is automatically set to "is_done" when
             # the qty_done is full
-            line.qty_done = line.quantity
+            line._pick_qty(line.quantity)
         picking = fields.first(lines.mapped("picking_id"))
         return self._action_picking_done(picking, force=allow_prepackaged_product)
 
     def _reset_lines(self, lines):
         for line in lines:
-            # note: the package level "is_done" field is automatically unset
-            # when the qty_done is not full
-            line.qty_done = 0
+            line._pick_qty(0)
 
     def _deliver_package(self, picking, package, location):
         lines = package.move_line_ids.filtered(
@@ -269,7 +268,7 @@ class Delivery(Component):
         # in the picking type, and then use IN (ids)
         domain = []
         if no_qty_done:
-            domain.append(("qty_done", "=", 0))
+            domain.append(("picked", "=", False))
         return domain
 
     def _lines_from_lot_domain(
@@ -420,7 +419,7 @@ class Delivery(Component):
                     message=self.msg_store.product_not_unitary_in_package_scan_package(),
                 )
         # We focus only on lines on which we can increase the 'qty_done'
-        lines = lines.filtered(lambda x: (x.qty_done + product_qty) <= x.quantity)
+        lines = lines.filtered(lambda x: (x.qty_picked + product_qty) <= x.quantity)
         # Filter lines to keep only ones from one delivery operation
         # (we do not want to process lines of another delivery operation)
         lines = lines._filter_on_picking(picking)
@@ -716,7 +715,7 @@ class Delivery(Component):
                 "Product Unit of Measure"
             )
             no_quantities_done = all(
-                float_is_zero(move_line.qty_done, precision_digits=precision_digits)
+                float_is_zero(move_line.qty_picked, precision_digits=precision_digits)
                 for move_line in picking.move_line_ids.filtered(
                     lambda m: m.state not in ("done", "cancel")
                 )
