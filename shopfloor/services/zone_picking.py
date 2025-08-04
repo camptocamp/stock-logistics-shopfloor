@@ -956,7 +956,7 @@ class ZonePicking(Component):
             for _move_line in package.move_line_ids:
                 if _move_line.state not in ("assigned", "partially_available"):
                     continue
-                _move_line._pick_qty(move_line.quantity)
+                _move_line.qty_picked = move_line.quantity
                 move_lines |= _move_line
         self._write_destination_on_lines(move_lines, location)
 
