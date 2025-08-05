@@ -688,7 +688,7 @@ class DeliveryScanDeliverSpecialCase(DeliveryCommonCase):
         picking = self._create_picking(lines=[(self.product_a, 10)])
         self._fill_stock_for_moves(picking.move_ids, in_package=True)
         picking.action_assign()
-        picking.move_line_ids._pick_qty(picking.move_line_ids.quantity)
+        picking.move_line_ids.picked = True
         picking._action_done()
         response = self.service.dispatch(
             "scan_deliver", params={"barcode": picking.name}

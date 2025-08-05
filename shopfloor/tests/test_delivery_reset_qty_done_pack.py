@@ -80,7 +80,7 @@ class DeliveryResetQtyDonePackCase(DeliveryCommonCase):
             params={"package_id": package.id, "picking_id": self.picking.id},
         )
         self.assert_response_deliver(response, picking=self.picking)
-        self.assertFalse(any(ml.qty_picked > 0 for ml in move_lines))
+        self.assertFalse(any(ml.picked for ml in move_lines))
 
     def test_reset_qty_done_pack_picking_status(self):
         package1 = self.pack1_moves.mapped("move_line_ids").mapped("package_id")

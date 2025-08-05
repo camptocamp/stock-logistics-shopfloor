@@ -216,20 +216,19 @@ class Delivery(Component):
                 product_qty, lines.move_id.product_uom
             )
             for line in lines:
-                line._pick_qty(line.qty_picked + qty_picked)
+                line.qty_picked += qty_picked
             return self._action_picking_done(
                 lines.picking_id, force=allow_prepackaged_product
             )
         for line in lines:
             # note: the package level is automatically set to "is_done" when
-            # the qty_done is full
-            line._pick_qty(line.quantity)
+            # the line is fully picked
+            line.picked = True
         picking = fields.first(lines.mapped("picking_id"))
         return self._action_picking_done(picking, force=allow_prepackaged_product)
 
     def _reset_lines(self, lines):
-        for line in lines:
-            line._pick_qty(0)
+        lines.picked = False
 
     def _deliver_package(self, picking, package, location):
         lines = package.move_line_ids.filtered(
@@ -256,7 +255,7 @@ class Delivery(Component):
         message = self._check_picking_type(lines.mapped("picking_id"))
         if message:
             return self._response_for_deliver(location=location, message=message)
-        # TODO add a message if any of the lines already had a qty_done > 0
+        # TODO add a message if any of the lines are already picked
         new_picking = fields.first(lines.mapped("picking_id"))
         if self._set_lines_done(lines):
             return self._response_for_deliver(
@@ -419,7 +418,7 @@ class Delivery(Component):
                     location=location,
                     message=self.msg_store.product_not_unitary_in_package_scan_package(),
                 )
-        # We focus only on lines on which we can increase the 'qty_done'
+        # We focus only on lines on which we can increase the 'qty_picked'
         lines = lines.filtered(lambda x: (x.qty_picked + product_qty) <= x.quantity)
         # Filter lines to keep only ones from one delivery operation
         # (we do not want to process lines of another delivery operation)
