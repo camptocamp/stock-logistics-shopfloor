@@ -50,6 +50,7 @@ class Reception(Component):
             picking, selected_line, packaging, message=msg
         )
 
+
 class ShopfloorReceptionValidator(Component):
     _inherit = "shopfloor.reception.validator"
 
@@ -74,6 +75,7 @@ class ShopfloorReceptionValidator(Component):
             },
             "packaging_id": {"coerce": to_int, "required": True, "type": "integer"},
         }
+
 
 class ShopfloorReceptionValidatorResponse(Component):
     _inherit = "shopfloor.reception.validator.response"

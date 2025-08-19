@@ -3,6 +3,7 @@
 
 from odoo.addons.component.core import Component
 
+
 class MeasuringComponent(Component):
     _name = "device.component.testdevice"
     _inherit = "measuring.device.base"

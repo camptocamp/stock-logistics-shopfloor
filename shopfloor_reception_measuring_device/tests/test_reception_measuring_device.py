@@ -5,6 +5,7 @@ from odoo_test_helper import FakeModelLoader
 
 from odoo.addons.shopfloor_reception.tests.common import CommonCase
 
+
 class TestSetPackDimension(CommonCase):
     @classmethod
     def setUpClass(cls):
@@ -26,18 +27,23 @@ class TestSetPackDimension(CommonCase):
     @classmethod
     def setUpComponentRegistry(cls):
         from .device_component import MeasuringComponent
+
         MeasuringComponent._build_component(cls._components_registry)
 
     @classmethod
     def setUpClassPackaging(cls):
         cls.packaging1 = cls.product_c.packaging_ids
-        cls.packaging2 = cls.env["product.packaging"].sudo().create(
-            {
-                "name": "Big Box",
-                "product_id": cls.product_c.id,
-                "barcode": "ProductCBigBox",
-                "qty": 6,
-            }
+        cls.packaging2 = (
+            cls.env["product.packaging"]
+            .sudo()
+            .create(
+                {
+                    "name": "Big Box",
+                    "product_id": cls.product_c.id,
+                    "barcode": "ProductCBigBox",
+                    "qty": 6,
+                }
+            )
         )
 
     @classmethod
@@ -45,7 +51,8 @@ class TestSetPackDimension(CommonCase):
         cls.loader = FakeModelLoader(cls.env, cls.__module__)
         cls.loader.backup_registry()
         from .device_model import MeasuringModel
-        cls.loader.update_registry((MeasuringModel, ))
+
+        cls.loader.update_registry((MeasuringModel,))
         cls.device_model = cls.env["measuring.device"].sudo()
         cls.device = cls.device_model.create(
             {
@@ -82,14 +89,14 @@ class TestSetPackDimension(CommonCase):
                 "picking_id": picking.id,
                 "selected_line_id": line.id,
                 "packaging_id": self.packaging1.id,
-            }
+            },
         )
         self._assert_response_set_dimension(
             response,
             picking,
             line,
             self.packaging1,
-            message=self.msg_store.no_measuring_device_found()
+            message=self.msg_store.no_measuring_device_found(),
         )
 
     def test_select_device__device_already_assigned(self):
@@ -103,14 +110,14 @@ class TestSetPackDimension(CommonCase):
                 "picking_id": picking.id,
                 "selected_line_id": line.id,
                 "packaging_id": self.packaging1.id,
-            }
+            },
         )
         self._assert_response_set_dimension(
             response,
             picking,
             line,
             self.packaging1,
-            message=self.msg_store.measuring_device_already_in_use(self.device)
+            message=self.msg_store.measuring_device_already_in_use(self.device),
         )
 
     def test_select_device__ok(self):
@@ -122,7 +129,7 @@ class TestSetPackDimension(CommonCase):
                 "picking_id": picking.id,
                 "selected_line_id": line.id,
                 "packaging_id": self.packaging1.id,
-            }
+            },
         )
         self._assert_response_set_dimension(
             response,
@@ -131,7 +138,7 @@ class TestSetPackDimension(CommonCase):
             self.packaging1,
             message=self.msg_store.measuring_device_selected(
                 self.device, self.packaging1
-            )
+            ),
         )
         self.assertEqual(self.packaging1.measuring_device_id, self.device)
         measurements = {
@@ -156,14 +163,14 @@ class TestSetPackDimension(CommonCase):
                 "picking_id": picking.id,
                 "selected_line_id": line.id,
                 "packaging_id": self.packaging1.id,
-            }
+            },
         )
         self._assert_response_set_dimension(
             response,
             picking,
             line,
             self.packaging1,
-            message=self.msg_store.no_measuring_device_to_release(self.packaging1)
+            message=self.msg_store.no_measuring_device_to_release(self.packaging1),
         )
 
     def test_release_device__ok(self):
@@ -177,7 +184,7 @@ class TestSetPackDimension(CommonCase):
                 "picking_id": picking.id,
                 "selected_line_id": line.id,
                 "packaging_id": self.packaging1.id,
-            }
+            },
         )
         self._assert_response_set_dimension(
             response,
@@ -186,7 +193,7 @@ class TestSetPackDimension(CommonCase):
             self.packaging1,
             message=self.msg_store.measuring_device_released(
                 self.packaging1, self.device
-            )
+            ),
         )
         self.assertFalse(self.packaging1.measuring_device_id)
 
