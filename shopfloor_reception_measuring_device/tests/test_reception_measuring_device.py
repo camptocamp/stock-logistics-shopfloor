@@ -70,7 +70,10 @@ class TestSetPackDimension(CommonCase):
         data = {
             "picking": self.data.picking(picking),
             "selected_move_line": self.data.move_line(line),
-            "packaging": self.data_detail.packaging_detail(packaging),
+            "packaging": dict(
+                self.data_detail.packaging_detail(packaging),
+                is_being_measured=bool(packaging.measuring_device_id),
+            ),
         }
         self.assert_response(
             response,
@@ -197,11 +200,3 @@ class TestSetPackDimension(CommonCase):
             ),
         )
         self.assertFalse(self.packaging1.measuring_device_id)
-
-    def test_packaging_data(self):
-        packaging = self.packaging1
-        data = self.data_detail.packaging_detail(packaging)
-        self.assertFalse(data["is_being_measured"])
-        self.packaging1._measuring_device_assign(self.device)
-        data = self.data_detail.packaging_detail(packaging)
-        self.assertTrue(data["is_being_measured"])
