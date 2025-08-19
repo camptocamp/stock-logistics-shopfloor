@@ -11,6 +11,7 @@ class TestSetPackDimension(CommonCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.menu.sudo().set_packaging_dimension = True
+        cls.wh = cls.env.ref("stock.warehouse0")
         cls.setUpClassPackaging()
         cls.setUpComponentRegistry()
         cls.setUpClassMeasuringDevice()
@@ -59,7 +60,7 @@ class TestSetPackDimension(CommonCase):
                 "name": "Test Device",
                 "device_type": "testdevice",
                 "state": "ready",
-                "warehouse_id": 1,
+                "warehouse_id": cls.wh.id,
             }
         )
 

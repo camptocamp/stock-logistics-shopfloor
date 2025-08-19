@@ -4,6 +4,7 @@
     "name": "Shopfloor Reception Measuring Device",
     "summary": "Allows to use measuring devices to measure packagings on the reception",
     "version": "18.0.1.0.0",
+    "development_status": "Alpha",
     "category": "Inventory",
     "website": "https://github.com/OCA/stock-logistics-shopfloor",
     "author": "Camptocamp, Odoo Community Association (OCA)",
@@ -11,6 +12,7 @@
     "license": "AGPL-3",
     "installable": True,
     "depends": [
+        "shopfloor_reception_packaging_dimension",
         "stock_measuring_device",
     ],
 }
