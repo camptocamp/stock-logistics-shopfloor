@@ -633,6 +633,7 @@ class Reception(Component):
         On error, return to the set quantity screen.
 
         """
+        self._prefill_package_type(line, package)
         pack_location = package.location_id
         if not pack_location:
             line.result_package_id = package
@@ -1253,8 +1254,17 @@ class Reception(Component):
         )
         if response:
             return response
-        picking._put_in_pack(selected_line)
+        package = picking._put_in_pack(selected_line)
+        self._prefill_package_type(selected_line, package)
         return self._response_for_set_destination(picking, selected_line)
+
+    def _prefill_package_type(self, line, package):
+        """Prefill the package type on the package before the move is done."""
+        package_type = line.product_id.package_type_id
+        packaging = line.product_id._find_best_packaging(line.qty_picked)
+        if packaging.package_type_id:
+            package_type = packaging.package_type_id
+        package.package_type_id = package_type
 
     def process_without_pack(self, picking_id, selected_line_id, quantity):
         picking = self.env["stock.picking"].browse(picking_id)
