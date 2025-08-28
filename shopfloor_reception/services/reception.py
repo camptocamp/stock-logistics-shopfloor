@@ -1273,6 +1273,11 @@ class Reception(Component):
         if packaging.package_type_id:
             package_type = packaging.package_type_id
         package.package_type_id = package_type
+        if not package.location_id:
+            if hasattr(line, "_recompute_putaways"):
+                # Recompute the putaway location if the module
+                # stock_picking_putaway_recompute is installed
+                line._recompute_putaways()
 
     def process_without_pack(self, picking_id, selected_line_id, quantity):
         picking = self.env["stock.picking"].browse(picking_id)
