@@ -1268,11 +1268,7 @@ class Reception(Component):
 
     def _prefill_package_type(self, line, package):
         """Prefill the package type on the package before the move is done."""
-        package_type = line.product_id.package_type_id
-        packaging = line.product_id._find_best_packaging(line.qty_picked)
-        if packaging.package_type_id:
-            package_type = packaging.package_type_id
-        package.package_type_id = package_type
+        package._assign_packaging(line.product_id, line.qty_picked)
         if not package.location_id:
             if hasattr(line, "_recompute_putaways"):
                 # Recompute the putaway location if the module
