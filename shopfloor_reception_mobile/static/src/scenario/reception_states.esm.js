@@ -230,6 +230,23 @@ export const reception_states = function () {
                 this.reset_notification();
             },
         },
+
+        set_storage_type: {
+            display_info: {
+                title: "Set storage type",
+                scan_placeholder: "Scan a storage type",
+            },
+            on_scan: (barcode) => {
+                this.wait_call(
+                    this.odoo.call("set_storage_type", {
+                        picking_id: this.state.data.picking.id,
+                        selected_line_id: this.line_being_handled.id,
+                        barcode: barcode.text,
+                    })
+                );
+            },
+        },
+
         set_destination: {
             display_info: {
                 title: "Set destination",
