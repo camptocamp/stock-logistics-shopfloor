@@ -51,7 +51,7 @@ const ReceptionPackageDimension = process_registry.extend("reception", {
                 return true;
             }
             return false;
-        }
+        };
         states.set_destination.is_height_required = is_height_required.bind(this);
         return states;
     },
