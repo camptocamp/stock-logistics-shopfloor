@@ -1,7 +1,7 @@
 /**
-* Copyright 2025 Camptocamp SA
-* License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
-*/
+ * Copyright 2025 Camptocamp SA
+ * License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+ */
 
 console.log("SHOPFLOOR RECEPTION PACKAGE DIMENSION MOBILE...loaded");
 
@@ -31,15 +31,17 @@ const new_template =
     </v-form>
     </div>
 
-    ` + template.substring(pos);
+    ` +
+    template.substring(pos);
 
 const ReceptionPackageDimension = process_registry.extend("reception", {
     template: new_template,
     "methods._get_states": function () {
-        let states = _get_states.bind(this)();
-        let _get_set_destination_data = states["set_destination"]._get_set_destination_data
-        let overriden = function(location) {
-            let data = _get_set_destination_data(location);
+        const states = _get_states.bind(this)();
+        const _get_set_destination_data =
+            states.set_destination._get_set_destination_data;
+        const overriden = function (location) {
+            const data = _get_set_destination_data(location);
             const height = this.line_being_handled.package_dest.height;
             if (height > 0) {
                 data.height = Number(height);
@@ -48,7 +50,7 @@ const ReceptionPackageDimension = process_registry.extend("reception", {
         };
         states.set_destination._get_set_destination_data = overriden.bind(this);
         return states;
-    }
+    },
 });
 
 process_registry.replace("reception", ReceptionPackageDimension);
