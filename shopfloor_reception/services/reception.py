@@ -836,7 +836,9 @@ class Reception(Component):
         return self._response(
             next_state="set_destination",
             data={
-                "selected_move_line": self._data_for_move_lines(line),
+                "selected_move_line": self._data_for_move_lines(
+                    line, with_package_type=True
+                ),
                 "picking": self.data.picking(picking),
             },
             message=message,
@@ -1446,14 +1448,20 @@ class Reception(Component):
     def _check_storage_type_valid(self, record):
         if not record.exists():
             return self.msg_store.package_type_not_found()
-        elif record.package_carrier_type != "none":
+        elif record.package_carrier_type and record.package_carrier_type != "none":
             return self.msg_store.storage_type_not_valid()
         return
 
+    def _get_storage_type(self):
+        domain = [("package_carrier_type", "=", False), ("barcode", "!=", False)]
+        return self.env["stock.package.type"].sudo().search(domain)
+
     def _response_for_set_storage_type(self, picking, line, message=None):
+        storage_types = self._get_storage_type()
         data = {
             "selected_move_line": self._data_for_move_lines(line),
             "picking": self._data_for_stock_picking(picking, with_lines=False),
+            "storage_types": self.data.package_type_list(storage_types),
         }
         return self._response(next_state="set_storage_type", data=data, message=message)
 
@@ -1678,6 +1686,7 @@ class ShopfloorReceptionValidatorResponse(Component):
             "set_destination": self._schema_set_destination,
             "select_dest_package": self._schema_select_dest_package,
             "confirm_new_package": self._schema_confirm_new_package,
+            "set_storage_type": self._schema_set_storage_type,
         }
 
     def _start_next_states(self):
@@ -1714,7 +1723,10 @@ class ShopfloorReceptionValidatorResponse(Component):
         return {"set_quantity", "select_move"}
 
     def _set_destination_next_states(self):
-        return {"set_destination", "select_move"}
+        return {"set_destination", "select_move", "set_storage_type"}
+
+    def _set_storage_type_next_states(self):
+        return {"set_storage_type", "set_destination"}
 
     def _select_dest_package_next_states(self):
         return {"set_lot", "select_dest_package", "confirm_new_package", "select_move"}
@@ -1798,7 +1810,10 @@ class ShopfloorReceptionValidatorResponse(Component):
         return {
             "selected_move_line": {
                 "type": "list",
-                "schema": {"type": "dict", "schema": self.schemas.move_line()},
+                "schema": {
+                    "type": "dict",
+                    "schema": self.schemas.move_line(with_package_type=True),
+                },
             },
             "picking": {"type": "dict", "schema": self.schemas.picking()},
         }
@@ -1841,6 +1856,19 @@ class ShopfloorReceptionValidatorResponse(Component):
                 self._schema_stock_picking_with_lines(), required=True
             ),
             "new_package_name": {"type": "string"},
+        }
+
+    @property
+    def _schema_set_storage_type(self):
+        return {
+            "selected_move_line": {
+                "type": "list",
+                "schema": {"type": "dict", "schema": self.schemas.move_line()},
+            },
+            "picking": {"type": "dict", "schema": self.schemas.picking()},
+            "storage_types": self.schemas._schema_list_of(
+                self.schemas.package(), required=False
+            ),
         }
 
     def _schema_stock_picking_with_lines(self, lines_with_packaging=False):
@@ -1902,6 +1930,9 @@ class ShopfloorReceptionValidatorResponse(Component):
 
     def set_destination(self):
         return self._response_schema(next_states=self._set_destination_next_states())
+
+    def set_storage_type(self):
+        return self._response_schema(next_states=self._set_storage_type_next_states())
 
     def select_dest_package(self):
         return self._response_schema(
