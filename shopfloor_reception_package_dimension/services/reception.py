@@ -12,11 +12,6 @@ from odoo.addons.component.core import Component
 class Reception(Component):
     _inherit = "shopfloor.reception"
 
-    # def set_destination(
-    #     self, picking_id, selected_line_id, location_name, confirmation=False, **kwargs
-    # ):
-    #     super().set_destination(picking_id, selected_line_id, location_name, confirmation)
-
     def _set_destination_handle_extra_params(
         self, picking, selected_move_line, **kwargs
     ):
@@ -27,9 +22,9 @@ class Reception(Component):
                 # TODO validate height
                 package.height = height
         return None
-        res = super()._set_destination_handle_extra_params(
-            picking, selected_move_line, location, params
-        )
+        # res = super()._set_destination_handle_extra_params(
+        #     picking, selected_move_line, **kwargs
+        # )
 
 
 class ShopfloorReceptionValidator(Component):
@@ -54,8 +49,10 @@ class ShopfloorReceptionValidatorResponse(Component):
     # def _schema_set_packaging_dimension(self):
     #     return {
     #         "picking": {"type": "dict", "schema": self.schemas.picking()},
-    #         "selected_move_line": {"type": "dict", "schema": self.schemas.move_line()},
-    #         "packaging": self._schema_packaging(),
+    #         "selected_move_line": {
+    #                "type": "dict",
+    #                "schema": self.schemas.move_line()},
+    #                "packaging": self._schema_packaging(),
     #     }
 
     # def _schema_packaging(self):
