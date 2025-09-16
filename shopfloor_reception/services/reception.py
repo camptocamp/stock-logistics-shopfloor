@@ -1381,7 +1381,9 @@ class Reception(Component):
             )
         search = self._actions_for("search")
 
-        message = self._set_destination_handle_extra_params(picking, selected_line, **kwargs)
+        message = self._set_destination_handle_extra_params(
+            picking, selected_line, **kwargs
+        )
         if message:
             return self._response_for_set_destination(
                 picking, selected_line, message=message
