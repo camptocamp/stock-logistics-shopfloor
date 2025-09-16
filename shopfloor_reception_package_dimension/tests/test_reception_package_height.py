@@ -53,7 +53,9 @@ class TestSetPackDimension(CommonCase):
             next_state="set_destination",
             data={
                 "picking": self.data.picking(self.picking),
-                "selected_move_line": self.data.move_lines(self.move_line),
+                "selected_move_line": self.data.move_lines(
+                    self.move_line, with_package_type=True
+                ),
             },
             message={
                 "message_type": "error",
