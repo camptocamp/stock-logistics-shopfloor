@@ -5,6 +5,7 @@
 
 # from odoo.addons.base_rest.components.service import to_int
 from odoo.addons.component.core import Component
+
 # from odoo.addons.shopfloor.utils import to_float
 
 
@@ -16,7 +17,8 @@ class Reception(Component):
     # ):
     #     super().set_destination(picking_id, selected_line_id, location_name, confirmation)
 
-    def _set_destination_handle_extra_params(self, picking, selected_move_line, **kwargs
+    def _set_destination_handle_extra_params(
+        self, picking, selected_move_line, **kwargs
     ):
         if "height" in kwargs:
             height = kwargs.get("height")
@@ -35,9 +37,10 @@ class ShopfloorReceptionValidator(Component):
 
     def set_destination(self):
         res = super().set_destination()
-        res["height"] = { "type": "float", "required": False}
-        res["height_uom"] = { "type": "string", "required": False}
+        res["height"] = {"type": "float", "required": False}
+        res["height_uom"] = {"type": "string", "required": False}
         return res
+
 
 class ShopfloorReceptionValidatorResponse(Component):
     _inherit = "shopfloor.reception.validator.response"

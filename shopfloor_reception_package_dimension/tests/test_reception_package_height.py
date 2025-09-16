@@ -31,7 +31,9 @@ class TestSetPackDimension(CommonCase):
         )
         self.assertEqual(package.height, 4)
         self.assert_response(
-            response, next_state="select_move", data=self._data_for_select_move(self.picking)
+            response,
+            next_state="select_move",
+            data=self._data_for_select_move(self.picking),
         )
 
     def test_scan_location_not_ok_and_change_height(self):
@@ -51,8 +53,11 @@ class TestSetPackDimension(CommonCase):
             response,
             next_state="set_destination",
             data={
-                "picking":self.data.picking(self.picking),
-                "selected_move_line": self.data.move_lines(self.move_line)
-                },
-            message={"message_type": "error", "body": "No location found for this barcode."},
+                "picking": self.data.picking(self.picking),
+                "selected_move_line": self.data.move_lines(self.move_line),
+            },
+            message={
+                "message_type": "error",
+                "body": "No location found for this barcode.",
+            },
         )
