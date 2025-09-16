@@ -41,6 +41,9 @@ class TestShopfloorReceptionChangeStorageType(CommonCase):
             data={
                 "picking": self.data.picking(picking),
                 "selected_move_line": self.data.move_lines(selected_move_line),
+                "storage_types": self.data.package_type_list(
+                    self.service._get_storage_type()
+                ),
             },
         )
 
