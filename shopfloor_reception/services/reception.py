@@ -1431,6 +1431,8 @@ class Reception(Component):
             )
             message = self._check_storage_type_valid(storage_type)
             if not message:
+                # FIXME : this is to avoid an exception when it is required
+                selected_line.result_package_id.height = 1
                 selected_line.result_package_id.package_type_id = storage_type
                 if hasattr(selected_line, "_recompute_putaways"):
                     # Recompute the putaway location if the module
@@ -1866,7 +1868,7 @@ class ShopfloorReceptionValidatorResponse(Component):
             },
             "picking": {"type": "dict", "schema": self.schemas.picking()},
             "storage_types": self.schemas._schema_list_of(
-                self.schemas.package(), required=False
+                self.schemas.package_type(), required=False
             ),
         }
 
