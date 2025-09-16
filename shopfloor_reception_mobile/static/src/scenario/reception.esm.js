@@ -164,17 +164,10 @@ const Reception = {
 
 
             <template v-if="state_is('set_storage_type')">
-                <item-detail-card
-                    :record="line_being_handled"
-                    :options="picking_detail_options_for_set_destination()"
-                    :card_color="utils.colors.color_for('screen_step_done')"
-                    :key="make_state_component_key(['reception-product-item-detail-set-destination-pack', state.data.picking.id])"
-                />
-                <item-detail-card
-                    :record="line_being_handled"
-                    :options="storage_type_options(line_being_handled, false)"
-                    :card_color="utils.colors.color_for('screen_step_todo')"
-                    :key="make_state_component_key(['reception-product-item-detail-set-destination-pack-type', state.data.picking.id])"
+                <manual-select
+                    :records="state.data.storage_types"
+                    :options="manual_select_options_for_storage_type()"
+                    :key="make_state_component_key(['reception', 'manual-select-storage-type'])"
                 />
                 <div class="button-list button-vertical-list full">
                     <v-row align="center">
@@ -334,6 +327,16 @@ const Reception = {
                 },
             };
         },
+        manual_select_options_for_storage_type: function () {
+            return {
+                group_title_default: "Available storage types",
+                group_color: this.utils.colors.color_for("screen_step_todo"),
+                list_item_component: "list-item",
+                list_item_options: {
+                    key_title: "name",
+                },
+            };
+        },
         picking_detail_options_for_set_lot: function () {
             return {
                 key_title: "product.display_name",
@@ -458,7 +461,7 @@ const Reception = {
         },
         storage_type_options: function (line, withAction = false) {
             const options = {
-                key_title: "package_dest.storage_type.name",
+                key_title: "package_dest.package_type.name",
                 title_icon: "mdi-package-variant-closed",
                 title_default: "/",
             };
