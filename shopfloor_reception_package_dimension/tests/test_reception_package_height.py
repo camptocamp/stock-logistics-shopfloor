@@ -37,7 +37,6 @@ class TestSetPackDimension(CommonCase):
         )
 
     def test_scan_location_not_ok_and_change_height(self):
-        location = self.move_line.move_id.location_dest_id
         package = self.picking._put_in_pack(self.move_line)
         response = self.service.dispatch(
             "set_destination",
