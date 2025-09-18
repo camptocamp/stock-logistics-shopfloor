@@ -637,6 +637,14 @@ class Reception(Component):
         self._prefill_package_type(line, package)
         pack_location = package.location_id
         if not pack_location:
+            package_line = fields.first(
+                picking.move_line_ids.filtered(
+                    lambda ml: ml.result_package_id == package
+                )
+            )
+            if package_line:
+                pack_location = package_line.location_dest_id
+        if not pack_location:
             line.result_package_id = package
             return None
         (
