@@ -34,6 +34,7 @@ class ShopfloorReceptionValidator(Component):
         res = super().set_destination()
         res["height"] = {"type": "float", "required": False}
         res["height_uom"] = {"type": "string", "required": False}
+        res["height_required"] = {"type": "boolean", "required": False}
         return res
 
 
