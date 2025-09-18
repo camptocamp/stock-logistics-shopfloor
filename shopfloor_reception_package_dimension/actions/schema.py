@@ -12,3 +12,12 @@ class ShopfloorSchemaAction(Component):
         res["height"] = {"type": "float", "nullable": True, "required": False}
         res["height_uom"] = {"type": "string", "nullable": True, "required": False}
         return res
+
+    def package_type(self):
+        res = super().package_type()
+        res["height_required"] = {
+            "type": "boolean",
+            "nullable": True,
+            "required": False,
+        }
+        return res
