@@ -11,6 +11,11 @@
     "maintainers": ["TDu"],
     "license": "AGPL-3",
     "installable": True,
-    "depends": ["shopfloor_reception", "stock_quant_package_dimension"],
-    # "data": ["views/shopfloor_menu.xml"],
+    # Although `stock_storage_type`is already a shopfloor dependency.
+    # It is planned to be removed there.
+    "depends": [
+        "shopfloor_reception",
+        "stock_quant_package_dimension",
+        "stock_storage_type",
+    ],
 }
