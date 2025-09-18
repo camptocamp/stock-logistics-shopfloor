@@ -14,3 +14,9 @@ class DataAction(Component):
         res.append("height")
         res.append("length_uom_name:height_uom")
         return res
+
+    @property
+    def _package_type_parser(self):
+        res = super()._package_type_parser
+        res.append("height_required")
+        return res
