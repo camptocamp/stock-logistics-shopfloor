@@ -18,7 +18,7 @@ const new_template =
     <div class="v-card__text details">
     <v-form ref="form_dimension">
         <v-container style="padding-top: 0; padding-bottom: 0">
-            <v-row>
+            <v-row v-if="state.data.selected_move_line[0].package_dest.package_type.height_required">
                 <v-text-field
                     label="Package Height"
                     type="number"
