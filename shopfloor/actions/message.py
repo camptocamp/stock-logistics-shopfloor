@@ -818,8 +818,8 @@ class MessageAction(Component):
     def lot_replaced_by_lot(self, old_lot, new_lot):
         return {
             "message_type": "success",
-            "body": _("Lot %(old_lot_name)s replaced by lot %(new_lot_name)s.").format(
-                old_lot.name, new_lot.name
+            "body": _("Lot {old_lot_name} replaced by lot {new_lot_name}.").format(
+                old_lot_name=old_lot.name, new_lot_name=new_lot.name
             ),
         }
 
