@@ -43,9 +43,7 @@ const ReceptionPackageDimension = process_registry.extend("reception", {
         const overriden = function (location) {
             const data = _get_set_destination_data(location);
             const height = this.line_being_handled.package_dest.height;
-            if (height > 0) {
-                data.height = Number(height);
-            }
+            data.height = Number(height);
             return data;
         };
         states.set_destination._get_set_destination_data = overriden.bind(this);
