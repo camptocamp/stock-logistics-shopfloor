@@ -35,7 +35,9 @@ class TestAssignPackageType(CommonCase):
             next_state="set_destination",
             data={
                 "picking": picking_data,
-                "selected_move_line": self.data.move_lines(self.selected_move_line),
+                "selected_move_line": self.data.move_lines(
+                    self.selected_move_line, with_package_type=True
+                ),
             },
         )
         package = self.selected_move_line.result_package_id
@@ -58,7 +60,9 @@ class TestAssignPackageType(CommonCase):
             next_state="set_destination",
             data={
                 "picking": picking_data,
-                "selected_move_line": self.data.move_lines(self.selected_move_line),
+                "selected_move_line": self.data.move_lines(
+                    self.selected_move_line, with_package_type=True
+                ),
             },
         )
         package = self.selected_move_line.result_package_id
