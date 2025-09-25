@@ -1130,6 +1130,7 @@ class Reception(Component):
                 asking_confirmation=barcode,
             )
         package = self.env["stock.quant.package"].create({"name": barcode})
+        self._prefill_package_type(selected_line, package)
         selected_line.result_package_id = package
         return self._response_for_set_destination(picking, selected_line)
 
