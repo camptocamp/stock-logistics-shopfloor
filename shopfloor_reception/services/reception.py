@@ -1868,7 +1868,7 @@ class ShopfloorReceptionValidatorResponse(Component):
         return {
             "selected_move_line": {
                 "type": "list",
-                "schema": {"type": "dict", "schema": self.schemas.move_line()},
+                "schema": {"type": "dict", "schema": self.schemas.move_line(with_package_type=True)},
             },
             "picking": {"type": "dict", "schema": self.schemas.picking()},
         }
