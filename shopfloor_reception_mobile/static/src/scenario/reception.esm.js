@@ -71,7 +71,7 @@ const Reception = {
                 </div>
             </template>
             <template v-if="state_is('select_move')">
-                <div class="button-list button-vertical-list full" v-if="state.data.last_processed_line">
+                <div class="button-list button-vertical-list full" v-if="state.data.last_processed_line_id">
                     <v-row align="center">
                         <v-col class="text-center" cols="12">
                             <btn-action action="todo" @click="state.on_repeat_last">Repeat</btn-action>
