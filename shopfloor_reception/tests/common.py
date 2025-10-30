@@ -98,7 +98,7 @@ class CommonCase(BaseCommonCase):
             "picking": picking_data,
         }
         if last_processed_line:
-            data["last_processed_line"] = last_processed_line.id
+            data["last_processed_line_id"] = last_processed_line.id
         return data
 
     def setUp(self):
