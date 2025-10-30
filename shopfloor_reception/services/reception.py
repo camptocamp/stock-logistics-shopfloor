@@ -162,7 +162,7 @@ class Reception(Component):
                     last_processed_line = None
         data = {"picking": self._data_for_stock_picking(picking, with_lines=True)}
         if last_processed_line:
-            data["last_processed_line"] = last_processed_line.id
+            data["last_processed_line_id"] = last_processed_line.id
         return self._response(next_state="select_move", data=data, message=message)
 
     def _response_for_confirm_done(self, picking, message=None):
@@ -1906,7 +1906,7 @@ class ShopfloorReceptionValidatorResponse(Component):
             "picking": self.schemas._schema_dict_of(
                 self._schema_stock_picking_with_lines(), required=True
             ),
-            "last_processed_line": {
+            "last_processed_line_id": {
                 "type": "integer",
                 "nullable": True,
                 "required": False,
