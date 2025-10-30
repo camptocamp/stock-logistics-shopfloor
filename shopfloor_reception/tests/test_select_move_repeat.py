@@ -15,26 +15,25 @@ class TestSelectMoveRepeat(CommonCase):
     def test_previous_processed_line_move_finished(self):
         """Check move done no possible repeat case."""
         picking = self._create_picking()
-        selected_move_line = picking.move_line_ids.filtered(
-            lambda li: li.product_id == self.product_b
+        working_line = picking.move_line_ids.filtered(
+            lambda li: li.product_id == self.product_a
         )
-        selected_move_line.location_dest_id = self.location_dest
-        self.service.dispatch(
-            "set_quantity",
-            params={
-                "picking_id": picking.id,
-                "selected_line_id": selected_move_line.id,
-                "quantity": 10,
-            },
+        # Receiving the full quantity
+        working_line.qty_picked = 10
+        working_line.lot_id = self.env["stock.lot"].create(
+            {"name": "Lot-001", "product_id": working_line.product_id.id}
         )
+        working_line.result_package_id = self.env["stock.quant.package"].create({})
+        working_line.location_dest_id = self.location_dest
         response = self.service.dispatch(
             "set_destination",
             params={
                 "picking_id": picking.id,
-                "selected_line_id": selected_move_line.id,
+                "selected_line_id": working_line.id,
                 "location_name": self.shelf2.name,
             },
         )
+        # The last_move_line is not return -> no Repeat button
         self.assert_response(
             response, next_state="select_move", data=self._data_for_select_move(picking)
         )
@@ -92,6 +91,7 @@ class TestSelectMoveRepeat(CommonCase):
         )
 
     def test_repeat_previous_reception_standard(self):
+        """Check repeating an operation without the auto post option."""
         picking = self._create_picking()
         selected_move_line = picking.move_line_ids.filtered(
             lambda li: li.product_id == self.product_b
