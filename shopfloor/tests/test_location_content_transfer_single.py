@@ -543,6 +543,10 @@ class LocationContentTransferSingleCase(LocationContentTransferCommonCase):
             - Only the first quantity should be transfered
             - The backorder line should be proposed after
         """
+        pickings = self.env["stock.picking"].search(
+            [("user_id", "=", self.env.uid), ("id", "!=", self.picking3.id)]
+        )
+        pickings.write({"user_id": False})
         move_line = self.picking3.move_line_ids[0]
         previous_priority = move_line.shopfloor_priority
         self.assertFalse(move_line.shopfloor_postponed)
