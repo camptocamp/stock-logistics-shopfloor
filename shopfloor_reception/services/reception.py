@@ -1277,7 +1277,9 @@ class Reception(Component):
             if hasattr(line, "_recompute_putaways"):
                 # Recompute the putaway location if the module
                 # stock_picking_putaway_recompute is installed
-                line._recompute_putaways()
+                line.with_context(
+                    allow_unsafe_putaway_recompute=True
+                )._recompute_putaways()
 
     def process_without_pack(self, picking_id, selected_line_id, quantity):
         picking = self.env["stock.picking"].browse(picking_id)
