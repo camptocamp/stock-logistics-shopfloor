@@ -52,7 +52,8 @@ class CheckoutListDestPackageCase(
                 (self.product_b, 10),
                 (self.product_c, 10),
                 (self.product_d, 10),
-            ]
+            ],
+            **{"carrier_id": self.carrier},
         )
         self._fill_stock_for_moves(picking.move_ids[:2], in_package=True)
         self._fill_stock_for_moves(picking.move_ids[2], in_package=True)
@@ -112,7 +113,7 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
                 (cls.product_b, 10),
                 (cls.product_c, 10),
                 (cls.product_d, 10),
-            ]
+            ],
         )
         pack1_moves = picking.move_ids[:3]
         pack2_moves = picking.move_ids[3:]
@@ -126,6 +127,7 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
         cls.package_type = cls.env.ref(
             "stock_storage_type.product_product_9_packaging_single_bag"
         )
+        cls.package_type.sudo().package_carrier_type = False
         cls.delivery_package = cls.env["stock.quant.package"].create(
             {"package_type_id": cls.package_type.id}
         )
@@ -147,7 +149,11 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
         return (
             picking.mapped("move_line_ids.package_id")
             | picking.mapped("move_line_ids.result_package_id")
-        ).filtered("package_type_id")
+        ).filtered(
+            lambda pack, picking=picking: pack._filter_for_picking_carrier_checkout(
+                picking=picking
+            )
+        )
 
     def _assert_package_set(self, response):
         self.assertRecordValues(
