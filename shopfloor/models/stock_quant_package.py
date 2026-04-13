@@ -99,3 +99,11 @@ class StockQuantPackage(models.Model):
             "package_id": quant.package_id.id,
             "owner_id": quant.owner_id.id,
         }
+
+    def _filter_for_picking_carrier(self, picking=None):
+        self.ensure_one()
+        return (
+            not self.package_type_id or not self.package_type_id.package_carrier_type
+            if not picking.carrier_id
+            else (self.package_type_id and self.package_type_id.package_carrier_type)
+        )

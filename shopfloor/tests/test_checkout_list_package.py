@@ -52,15 +52,14 @@ class CheckoutListDestPackageCase(
                 (self.product_b, 10),
                 (self.product_c, 10),
                 (self.product_d, 10),
-            ]
+            ],
+            **{"carrier_id": self.carrier},
         )
         self._fill_stock_for_moves(picking.move_ids[:2], in_package=True)
         self._fill_stock_for_moves(picking.move_ids[2], in_package=True)
         self._fill_stock_for_moves(picking.move_ids[3], in_package=True)
         picking.action_assign()
-        package_type = self.env.ref(
-            "stock_storage_type.product_product_9_packaging_single_bag"
-        )
+        package_type = self.env["stock.package.type"].search([], limit=1)
         delivery_package = self.env["stock.quant.package"].create(
             {"package_type_id": package_type.id}
         )
@@ -112,7 +111,8 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
                 (cls.product_b, 10),
                 (cls.product_c, 10),
                 (cls.product_d, 10),
-            ]
+            ],
+            # **{"carrier_id": cls.carrier}
         )
         pack1_moves = picking.move_ids[:3]
         pack2_moves = picking.move_ids[3:]
@@ -123,9 +123,8 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
 
         cls.selected_lines = pack1_moves.move_line_ids
         cls.pack1 = pack1_moves.move_line_ids.package_id
-        cls.package_type = cls.env.ref(
-            "stock_storage_type.product_product_9_packaging_single_bag"
-        )
+        cls.package_type = cls.env["stock.package.type"].search([], limit=1)
+        cls.package_type.sudo().package_carrier_type = False
         cls.delivery_package = cls.env["stock.quant.package"].create(
             {"package_type_id": cls.package_type.id}
         )
@@ -147,7 +146,11 @@ class CheckoutScanSetDestPackageCase(CheckoutCommonCase, SelectDestPackageMixin)
         return (
             picking.mapped("move_line_ids.package_id")
             | picking.mapped("move_line_ids.result_package_id")
-        ).filtered("package_type_id")
+        ).filtered(
+            lambda pack, picking=picking: pack._filter_for_picking_carrier(
+                picking=picking
+            )
+        )
 
     def _assert_package_set(self, response):
         self.assertRecordValues(
