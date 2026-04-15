@@ -12,10 +12,16 @@ class PackingAction(Component):
     _usage = "packing"
 
     def package_type_valid_for_carrier(self, package_type, carrier):
-        return package_type.package_carrier_type in (
-            "none",
-            carrier.delivery_type,
-        )
+        # validate carrier type
+        if package_type.package_carrier_type not in ("none", carrier.delivery_type):
+            return False
+        # validate specific carrier if set
+        if (
+            package_type.package_carrier_id
+            and package_type.package_carrier_id != carrier
+        ):
+            return False
+        return True
 
     def create_delivery_package(self, carrier):
         default_package_type = self._get_default_package_type(carrier)
