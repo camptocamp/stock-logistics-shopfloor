@@ -1306,7 +1306,9 @@ class ZonePicking(Component):
         carrier = picking.ship_carrier_id or picking.carrier_id
         if carrier:
             actions = self._actions_for("packing")
-            if actions.package_type_valid_for_carrier(package.package_type_id, carrier):
+            if actions.package_type_valid_for_carrier(
+                package.package_type_id, carrier, picking
+            ):
                 good_for_packing = True
             else:
                 message = self.msg_store.package_type_invalid_for_carrier(

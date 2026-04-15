@@ -724,7 +724,9 @@ class Checkout(Component):
         carrier = self._get_carrier(picking)
         if carrier:
             # Validate against carrier
-            is_valid = self._package_type_good_for_carrier(package_type, carrier)
+            is_valid = self._package_type_good_for_carrier(
+                picking, package_type, carrier
+            )
         else:
             is_valid = True
         if carrier and not is_valid:
@@ -1177,7 +1179,9 @@ class Checkout(Component):
         carrier = self._get_carrier(picking)
         if carrier:
             # Validate against carrier
-            is_valid = self._package_type_good_for_carrier(package_type, carrier)
+            is_valid = self._package_type_good_for_carrier(
+                picking, package_type, carrier
+            )
         else:
             is_valid = True
         if carrier and not is_valid:
@@ -1200,22 +1204,15 @@ class Checkout(Component):
     def _get_carrier(self, picking):
         return picking.ship_carrier_id or picking.carrier_id
 
-    def _package_type_good_for_carrier(self, package_type, carrier):
+    def _package_type_good_for_carrier(self, picking, package_type, carrier):
         actions = self._actions_for("packing")
-        return actions.package_type_valid_for_carrier(package_type, carrier)
+        return actions.package_type_valid_for_carrier(
+            package_type, carrier, picking=picking
+        )
 
     def _get_available_package_type(self, picking):
-        model = self.env["stock.package.type"]
-        carrier = picking.ship_carrier_id or picking.carrier_id
-        if not carrier:
-            return model.search(
-                [("package_carrier_type", "=", False)],
-                order="name",
-            )
-        return model.search(
-            [("package_carrier_type", "=", carrier.delivery_type or "none")],
-            order="name",
-        )
+        actions = self._actions_for("packing")
+        return actions.available_package_types_for_picking(picking, order="name")
 
     def list_package_type(self, picking_id, selected_line_ids):
         """List available package type for given picking.
