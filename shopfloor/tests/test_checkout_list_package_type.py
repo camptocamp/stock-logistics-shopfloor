@@ -124,3 +124,69 @@ class CheckoutListDeliveryPackagingCase(CheckoutCommonCase, CheckoutSelectPackag
             },
             message=self.service.msg_store.no_package_type_available(),
         )
+
+    def test_list_package_type_filtered_by_carrier(self):
+        another_carrier = self.env["delivery.carrier"].search(
+            [("id", "!=", self.carrier.id)], limit=1
+        )
+        another_carrier.sudo().delivery_type = "test"
+        package_type3 = (
+            self.env["stock.package.type"]
+            .sudo()
+            .create(
+                {
+                    "name": "Box 3",
+                    "package_carrier_type": "test",
+                    "barcode": "BOX3",
+                }
+            )
+        )
+        self.package_type1.package_carrier_id = another_carrier
+        self.package_type2.package_carrier_id = self.carrier
+
+        self._fill_stock_for_moves(self.picking.move_ids, in_package=True)
+        self.picking.action_assign()
+        selected_lines = self.picking.move_line_ids
+
+        response = self.service.dispatch(
+            "list_package_type",
+            params={
+                "picking_id": self.picking.id,
+                "selected_line_ids": selected_lines.ids,
+            },
+        )
+
+        expected_types = (self.package_type2 | package_type3).sorted("name")
+        self.assert_response(
+            response,
+            next_state="select_package_type",
+            data={
+                "package_type": self.service.data.package_type_list(expected_types),
+            },
+        )
+
+    def test_list_package_type_without_carrier_excludes_dedicated(self):
+        self.picking.carrier_id = False
+        self.package_type1.package_carrier_type = False
+        self.package_type2.package_carrier_type = False
+        self.package_type1.package_carrier_id = self.carrier
+
+        self._fill_stock_for_moves(self.picking.move_ids, in_package=True)
+        self.picking.action_assign()
+        selected_lines = self.picking.move_line_ids
+
+        response = self.service.dispatch(
+            "list_package_type",
+            params={
+                "picking_id": self.picking.id,
+                "selected_line_ids": selected_lines.ids,
+            },
+        )
+
+        self.assert_response(
+            response,
+            next_state="select_package_type",
+            data={
+                "package_type": self.service.data.package_type_list(self.package_type2),
+            },
+        )
