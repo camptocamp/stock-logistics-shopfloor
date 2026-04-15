@@ -82,6 +82,29 @@ class CheckoutListSetPackageTypeCase(CheckoutCommonCase):
             },
         )
 
+    def test_list_package_type_ok_exclude_dedicated_carrier(self):
+        carrier = self.env["delivery.carrier"].search([], limit=1)
+        self.package_type_box.package_carrier_id = carrier
+
+        response = self.service.dispatch(
+            "change_list_package_type",
+            params={"picking_id": self.picking.id, "package_id": self.package.id},
+        )
+
+        self.assert_response(
+            response,
+            next_state="change_package_type",
+            data={
+                "picking": self._picking_summary_data(self.picking),
+                "package": self._package_data(self.package, self.picking),
+                "package_type": [
+                    self._package_type_data(package_type)
+                    for package_type in self.package_type_inner_box
+                    + self.package_type_pallet
+                ],
+            },
+        )
+
     def test_list_package_type_error_package_not_found(self):
         response = self.service.dispatch(
             "change_list_package_type",

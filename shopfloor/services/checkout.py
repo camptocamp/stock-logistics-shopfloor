@@ -1206,16 +1206,24 @@ class Checkout(Component):
 
     def _get_available_package_type(self, picking):
         model = self.env["stock.package.type"]
-        carrier = picking.ship_carrier_id or picking.carrier_id
+        carrier = self._get_carrier(picking)
+        domain = []
         if not carrier:
-            return model.search(
-                [("package_carrier_type", "=", False)],
-                order="name",
+            domain = [("package_carrier_type", "=", False)]
+            if "package_carrier_id" in model._fields:
+                domain.append(("package_carrier_id", "=", False))
+            return model.search(domain, order="name")
+
+        domain = [("package_carrier_type", "=", carrier.delivery_type or "none")]
+        if "package_carrier_id" in model._fields:
+            domain.extend(
+                [
+                    "|",
+                    ("package_carrier_id", "=", False),
+                    ("package_carrier_id", "=", carrier.id),
+                ]
             )
-        return model.search(
-            [("package_carrier_type", "=", carrier.delivery_type or "none")],
-            order="name",
-        )
+        return model.search(domain, order="name")
 
     def list_package_type(self, picking_id, selected_line_ids):
         """List available package type for given picking.
