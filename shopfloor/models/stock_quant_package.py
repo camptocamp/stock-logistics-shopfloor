@@ -100,7 +100,15 @@ class StockQuantPackage(models.Model):
             "owner_id": quant.owner_id.id,
         }
 
-    def _filter_for_picking_carrier(self, picking=None):
+    def _filter_for_picking_carrier_checkout(self, picking=None):
+        """Filter packs to be displayed in shopfloor checkout scenario
+
+        In case:
+        - Carrier is defined on the picking: Keep packs having a package type that
+          has its carrier type defined
+        - Carrier is not defined on the picking: Keep packs without a package type
+          or with a package type that does not have a carrier type defined
+        """
         self.ensure_one()
         return (
             not self.package_type_id or not self.package_type_id.package_carrier_type
