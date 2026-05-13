@@ -48,6 +48,7 @@ class CheckoutListDeliveryPackagingCase(CheckoutCommonCase, CheckoutSelectPackag
             ]
         )
         cls.picking.carrier_id = cls.carrier
+        cls.picking.picking_type_id.sudo().filter_package_type_on_put_in_pack = True
         cls.packaging_type = (
             cls.env["product.packaging.level"]
             .sudo()
