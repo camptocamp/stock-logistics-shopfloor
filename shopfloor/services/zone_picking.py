@@ -1336,9 +1336,16 @@ class ZonePicking(Component):
         picking_type = move_line.move_id.picking_id.picking_type_id
         if not picking_type.exists():
             return self._response_for_start(message=self.msg_store.record_not_found())
-        if not zero:
-            inventory = self._actions_for("inventory")
-            inventory.create_draft_check_empty(
+        inventory = self._actions_for("inventory")
+        if zero:
+            inventory.confirm_empty(
+                move_line.location_id,
+                move_line.product_id,
+                ref=picking_type.name,
+                lot=move_line.lot_id,
+            )
+        else:
+            inventory.confirm_not_empty(
                 move_line.location_id,
                 move_line.product_id,
                 ref=picking_type.name,

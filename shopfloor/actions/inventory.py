@@ -22,9 +22,9 @@ class InventoryAction(Component):
         # see comment in models/stock_inventory.py
         return self.env["stock.quant"].with_context(_sf_inventory=True)
 
-    def create_draft_check_empty(self, location, product, ref=None, lot=None):
+    def create_draft_check_empty(self, location, product, qty=0, ref=None, lot=None):
         """Create a draft inventory for a product with a zero quantity"""
-        return self._create_draft_inventory(location, product, lot=lot)
+        return self._create_draft_inventory(location, product, qty=qty, lot=lot)
 
     def _inventory_exists(self, location, product, package=None, lot=None):
         """Return if an inventory for location and product exist"""
@@ -51,7 +51,7 @@ class InventoryAction(Component):
             domain.append(("lot_id", "=", False))
         return self.inventory_model.search(domain, limit=limit)
 
-    def _create_draft_inventory(self, location, product, package=None, lot=None):
+    def _create_draft_inventory(self, location, product, qty=0, package=None, lot=None):
         quants = self._get_existing_quant(
             location, product, package=package, lot=lot, limit=None
         )
@@ -63,7 +63,7 @@ class InventoryAction(Component):
                     {
                         # Set a user to prevent the zero quant cleanup
                         "user_id": self.env.user.id,
-                        "inventory_quantity": 0,
+                        "inventory_quantity": qty,
                         "inventory_quantity_set": True,
                         "inventory_date": fields.Date.today(),
                     }
@@ -80,7 +80,7 @@ class InventoryAction(Component):
                     "location_id": location.id,
                     "product_id": product.id,
                     "lot_id": lot.id if lot else False,
-                    "inventory_quantity": 0,
+                    "inventory_quantity": qty,
                     "inventory_quantity_set": True,
                     "inventory_date": fields.Date.today(),
                     "package_id": package.id if package else False,
@@ -97,6 +97,12 @@ class InventoryAction(Component):
         """
         if not self._inventory_exists(location, product, package=package, lot=lot):
             self._create_draft_inventory(location, product, package=package, lot=lot)
+
+    def confirm_not_empty(self, location, product, ref=None, lot=None):
+        return self.create_draft_check_empty(location, product, qty=1, ref=ref, lot=lot)
+
+    def confirm_empty(self, location, product, ref=None, lot=None):
+        return self.create_draft_check_empty(location, product, qty=0, ref=ref, lot=lot)
 
     def create_stock_issue(self, move, location, package, lot):
         """Create an inventory for a stock issue
