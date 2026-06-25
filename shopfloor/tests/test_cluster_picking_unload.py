@@ -197,13 +197,12 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
         # to the 'start_line' state to work on the remaining line.
         lines_to_unload = self.move_lines[:2]
         self._set_dest_package_and_done(lines_to_unload, self.bin1)
-        lines_to_unload.write({"location_dest_id": self.packing_location.id})
 
         response = self.service.dispatch(
             "set_destination_all",
             params={
                 "picking_batch_id": self.batch.id,
-                "barcode": self.packing_location.barcode,
+                "barcode": self.packing_a_location.barcode,
             },
         )
         # Since the whole batch is not complete, state should not be done.
@@ -221,17 +220,16 @@ class ClusterPickingSetDestinationAllCase(ClusterPickingUnloadingCommonCase):
                     "picked": True,
                     "state": "done",
                     "picking_id": self.one_line_picking.id,
-                    "location_dest_id": self.packing_location.id,
+                    "location_dest_id": self.packing_a_location.id,
                 },
                 {
                     "shopfloor_unloaded": True,
                     "qty_picked": 10,
                     "quantity": 10,
                     "picked": True,
-                    # will be done when the second line of the picking is unloaded
-                    "state": "assigned",
-                    "picking_id": self.two_lines_picking.id,
-                    "location_dest_id": self.packing_location.id,
+                    "state": "done",
+                    "picking_id": self.new_picking.id,
+                    "location_dest_id": self.packing_a_location.id,
                 },
                 {
                     "shopfloor_unloaded": False,
