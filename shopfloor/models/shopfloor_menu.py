@@ -304,6 +304,15 @@ class ShopfloorMenu(models.Model):
         help="Python code to sort processing move lines.",
     )
 
+    jump_to_menu_zone_picking_unload_all = fields.Many2one(
+        comodel_name="shopfloor.menu",
+        string="Jump after Unload All"
+    )
+    jump_to_menu_single_pack_transfer_validate = fields.Many2one(
+        comodel_name="shopfloor.menu",
+        string="Jump after Validate",
+    )
+
     @api.onchange("unload_package_at_destination")
     def _onchange_unload_package_at_destination(self):
         # Uncheck pick_pack_same_time when unload_package_at_destination is set to True
