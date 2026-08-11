@@ -303,6 +303,9 @@ class ZonePicking(Component):
             next_state="unload_set_destination", data=data, message=message
         )
 
+    def _get_data_for_jump_to_menu(self):
+        return self._response_for_start()
+
     def _data_for_select_picking_type(self, zone_location, picking_types):
         data = {
             "zone_location": self.data.location(zone_location),
@@ -1271,7 +1274,7 @@ class ZonePicking(Component):
 
     def _process_next_line(self, message=None):
         menu_jump = self.work.menu._get_jumpto_menu(
-            "jump_to_menu_zone_picking_unload_all"
+            "jump_to_zone_picking_unload_all_menu_id"
         )
         if menu_jump:
             return self._response_for_jump_to_menu(menu_jump, message=message)

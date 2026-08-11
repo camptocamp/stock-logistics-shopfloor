@@ -304,10 +304,10 @@ class ShopfloorMenu(models.Model):
         help="Python code to sort processing move lines.",
     )
 
-    jump_to_menu_zone_picking_unload_all = fields.Many2one(
+    jump_to_zone_picking_unload_all_menu_id = fields.Many2one(
         comodel_name="shopfloor.menu", string="Jump after Unload All"
     )
-    jump_to_menu_single_pack_transfer_validate = fields.Many2one(
+    jump_to_single_pack_transfer_validate_menu_id = fields.Many2one(
         comodel_name="shopfloor.menu",
         string="Jump after Validate",
     )
