@@ -77,15 +77,7 @@ class TestSinglePackTransferJumptoMenu(SinglePackTransferCommonBase):
         package_level.is_done = True
         return package_level
 
-    def assert_response_jump_to_menu(
-        self, response, menu, state_data=None, message=None
-    ):
-        data = {
-            "next_state": "start",
-            "menu_id": menu.id,
-        }
-        if state_data:
-            data["state_data"] = state_data
+    def assert_response_jump_to_menu(self, response, data=None, message=None):
         self.assert_response(
             response,
             next_state="jump_to_menu",
@@ -94,7 +86,7 @@ class TestSinglePackTransferJumptoMenu(SinglePackTransferCommonBase):
         )
 
     def test_validate_jump_to_menu(self):
-        self.menu.sudo().jump_to_menu_single_pack_transfer_validate = self.menu2
+        self.menu.sudo().jump_to_single_pack_transfer_validate_menu_id = self.menu2
         package_level = self._simulate_started(self.pack_a)
         response = self.service.dispatch(
             "validate",
@@ -103,4 +95,9 @@ class TestSinglePackTransferJumptoMenu(SinglePackTransferCommonBase):
                 "location_barcode": self.shelf2.barcode,
             },
         )
-        self.assert_response_jump_to_menu(response, self.menu2)
+        expected_data = {
+            "menu_id": self.menu2.id,
+            "next_state": "start",
+            "states_data": '{"start": {"zones": []}}',
+        }
+        self.assert_response_jump_to_menu(response, expected_data)
