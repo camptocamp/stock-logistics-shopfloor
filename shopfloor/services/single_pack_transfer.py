@@ -270,9 +270,7 @@ class SinglePackTransfer(Component):
         if self._is_last_move(move):
             completion_info = self._actions_for("completion.info")
             completion_info_popup = completion_info.popup(package_level.move_line_ids)
-        menu_jump = self.work.menu._get_jumpto_menu(
-            "jump_to_single_pack_transfer_validate_menu_id"
-        )
+        menu_jump = self.work.menu.jump_to_single_pack_transfer_validate_menu_id
         if menu_jump:
             return self._response_for_jump_to_menu(menu_jump, message=message)
         return self._response_for_start(message=message, popup=completion_info_popup)
