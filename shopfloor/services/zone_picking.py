@@ -1273,9 +1273,7 @@ class ZonePicking(Component):
         return self._process_next_line(message=message)
 
     def _process_next_line(self, message=None):
-        menu_jump = self.work.menu._get_jumpto_menu(
-            "jump_to_zone_picking_unload_all_menu_id"
-        )
+        menu_jump = self.work.menu.jump_to_zone_picking_unload_all_menu_id
         if menu_jump:
             return self._response_for_jump_to_menu(menu_jump, message=message)
         response = self.list_move_lines()
