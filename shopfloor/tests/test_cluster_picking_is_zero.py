@@ -24,7 +24,6 @@ class ClusterPickingIsZeroCase(ClusterPickingCommonCase):
             [
                 [
                     cls.BatchProduct(product=cls.product_a, quantity=10),
-                    cls.BatchProduct(product=cls.product_b, quantity=10),
                 ]
             ]
         )
@@ -32,9 +31,7 @@ class ClusterPickingIsZeroCase(ClusterPickingCommonCase):
         cls._simulate_batch_selected(cls.batch)
 
         cls.line = cls.picking.move_line_ids[0]
-        cls.next_line = cls.picking.move_line_ids[1]
         cls.line.location_id = cls.shelf1
-        cls.next_line.location_id = cls.shelf2
         cls.bin1 = cls.env["stock.quant.package"].create({})
         cls._update_qty_in_location(
             cls.line.location_id, cls.line.product_id, cls.line.quantity
@@ -43,9 +40,17 @@ class ClusterPickingIsZeroCase(ClusterPickingCommonCase):
         # system see the location is empty and reach "zero_check"
         cls._set_dest_package_and_done(cls.line, cls.bin1)
 
+    def source_qty(self, product, location):
+        return sum(
+            self.env["stock.quant"]._gather(product, location).mapped("quantity")
+        )
+
     def test_is_zero_is_empty(self):
         """call /is_zero confirming it's empty"""
-        response = self.service.dispatch(
+        # Source location holds the quantity to move
+        available = self.source_qty(self.line.product_id, self.line.location_id)
+        self.assertEqual(available, 10)
+        self.service.dispatch(
             "is_zero",
             params={
                 "picking_batch_id": self.batch.id,
@@ -53,18 +58,22 @@ class ClusterPickingIsZeroCase(ClusterPickingCommonCase):
                 "zero": True,
             },
         )
-        self.assert_response(
-            response,
-            next_state="start_line",
-            data=self._line_data(self.next_line),
-            message={
-                "message_type": "success",
-                "body": (
-                    f"{self.line.qty_picked} {self.line.product_id.display_name} "
-                    f"put in {self.bin1.name}"
-                ),
+        # the batch is unloaded and validated
+        self.service.dispatch(
+            "prepare_unload",
+            params={"picking_batch_id": self.batch.id},
+        )
+        self.service.dispatch(
+            "set_destination_all",
+            params={
+                "picking_batch_id": self.batch.id,
+                "barcode": self.packing_location.barcode,
             },
         )
+        self.assertEqual(self.picking.state, "done")
+        # Check the source location is empty (no negative quants)
+        available = self.source_qty(self.line.product_id, self.line.location_id)
+        self.assertEqual(available, 0)
 
     def test_is_zero_is_not_empty(self):
         """call /is_zero not confirming it's empty"""
