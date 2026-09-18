@@ -110,7 +110,9 @@ class InventoryAction(Component):
         )
 
     def confirm_empty(self, location, product, ref=None, package=None, lot=None):
-        quants = self._get_existing_quant(location, limit=None)
+        quants = self._get_existing_quant(
+            location, package=package, lot=lot, limit=None
+        )
         if quants.filtered(
             lambda quant: quant.user_id and quant.user_id != self.env.user
         ):
