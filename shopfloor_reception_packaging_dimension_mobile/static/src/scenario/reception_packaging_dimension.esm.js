@@ -73,7 +73,7 @@ const new_template =
                     type="number"
                     :suffix="state.data.packaging.weight_uom"
                     placeholder="Packaging Max Weight"
-                    v-model="state.data.packaging.max_weight"
+                    v-model="state.data.packaging.weight"
                 ></v-text-field>
             </v-row>
             <!-- extend -->
@@ -107,7 +107,7 @@ const new_template =
 const ReceptionPackageDimension = process_registry.extend("reception", {
     template: new_template,
     "methods.get_packaging_measurements": function () {
-        return ["length", "width", "height", "max_weight", "qty", "barcode"];
+        return ["length", "width", "height", "weight", "qty", "barcode"];
     },
     "methods._get_states": function () {
         const states = _get_states.bind(this)();
