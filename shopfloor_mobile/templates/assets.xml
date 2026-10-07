@@ -10,133 +10,81 @@
         inherit_id="shopfloor_mobile_base.shopfloor_app_assets"
     >
         <script id="script_app_main" position="before">
-            <t t-set="mod_version" t-value="get_version('shopfloor_mobile')" />
             <link
                 id="link_css_main"
-                t-attf-href="/shopfloor_mobile/static/wms/src/css/main.css?v=#{mod_version}"
+                t-att-href="static_url('/shopfloor_mobile/static/wms/src/css/main.css')"
                 rel="stylesheet"
             />
-            <script
-                id="script_scren_override"
-                t-attf-src="/shopfloor_mobile/static/wms/src/screen.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_wms_utils"
-                t-attf-src="/shopfloor_mobile/static/wms/src/wms_utils.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_manual_select_color"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/manual_select_color.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_misc"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/misc.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_add_translations_registry"
-                t-attf-src="/shopfloor_mobile/static/wms/src/i18n/add_translations_to_registry.esm.js?v=#{app_version}"
-                type="module"
-            />
-            <script
-                id="script_component_packaging_qty_picker"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/packaging-qty-picker.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_location"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_location.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_package"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_package.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_lot"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_lot.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_product"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_product.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_transfer"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_transfer.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_detail_operation"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/detail/detail_operation.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_batch_picking_detail"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/batch_picking_detail.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_batch_picking_line_detail"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/batch_picking_line_detail.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_picking_select"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/scenario_picking_detail/picking_select.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_picking_summary"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/scenario_picking_detail/picking_summary.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_component_form_edit_stock_picking"
-                t-attf-src="/shopfloor_mobile/static/wms/src/components/forms/form_edit_stock_picking.esm.js?v=#{mod_version}"
-                type="module"
-            />
+            <script id="script_scren_override" type="module">
+                import "/shopfloor_mobile/static/wms/src/screen.esm.js";
+            </script>
+            <script id="script_wms_utils" type="module">
+                import "/shopfloor_mobile/static/wms/src/wms_utils.esm.js";
+            </script>
+            <script id="script_manual_select_color" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/manual_select_color.esm.js";
+            </script>
+            <script id="script_misc" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/misc.esm.js";
+            </script>
+            <script id="script_add_translations_registry" type="module">
+                import "/shopfloor_mobile/static/wms/src/i18n/add_translations_to_registry.esm.js";
+            </script>
+            <script id="script_component_packaging_qty_picker" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/packaging-qty-picker.esm.js";
+            </script>
+            <script id="script_component_detail_location" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_location.esm.js";
+            </script>
+            <script id="script_component_detail_package" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_package.esm.js";
+            </script>
+            <script id="script_component_detail_lot" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_lot.esm.js";
+            </script>
+            <script id="script_component_detail_product" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_product.esm.js";
+            </script>
+            <script id="script_component_detail_transfer" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_transfer.esm.js";
+            </script>
+            <script id="script_component_detail_operation" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/detail/detail_operation.esm.js";
+            </script>
+            <script id="script_component_batch_picking_detail" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/batch_picking_detail.esm.js";
+            </script>
+            <script id="script_component_batch_picking_line_detail" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/batch_picking_line_detail.esm.js";
+            </script>
+            <script id="script_component_picking_select" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/scenario_picking_detail/picking_select.esm.js";
+            </script>
+            <script id="script_component_picking_summary" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/scenario_picking_detail/picking_summary.esm.js";
+            </script>
+            <script id="script_component_form_edit_stock_picking" type="module">
+                import "/shopfloor_mobile/static/wms/src/components/forms/form_edit_stock_picking.esm.js";
+            </script>
             <!-- Scenario -->
-            <script
-                id="script_scenario_single_pack_transfer"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/single_pack_transfer.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_cluster_picking"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/cluster_picking.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_checkout_states"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/checkout_states.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_checkout"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/checkout.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_delivery"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/delivery.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_location_content_transfer"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/location_content_transfer.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_scenario_zone_picking"
-                t-attf-src="/shopfloor_mobile/static/wms/src/scenario/zone_picking.esm.js?v=#{mod_version}"
-                type="module"
-            />
+            <script id="script_scenario_single_pack_transfer" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/single_pack_transfer.esm.js";
+            </script>
+            <script id="script_scenario_cluster_picking" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/cluster_picking.esm.js";
+            </script>
+            <script id="script_scenario_checkout" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/checkout.esm.js";
+            </script>
+            <script id="script_scenario_delivery" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/delivery.esm.js";
+            </script>
+            <script id="script_scenario_location_content_transfer" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/location_content_transfer.esm.js";
+            </script>
+            <script id="script_scenario_zone_picking" type="module">
+                import "/shopfloor_mobile/static/wms/src/scenario/zone_picking.esm.js";
+            </script>
         </script>
     </template>
     <template
@@ -144,42 +92,27 @@
         inherit_id="shopfloor_mobile_base.shopfloor_app_demo_assets"
     >
         <xpath expr="//script[last()]" position="after">
-            <t t-set="mod_version" t-value="get_version('shopfloor_mobile')" />
-            <script
-                id="script_demo_checkout"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.checkout.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_cluster_picking"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.cluster_picking.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_delivery"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.delivery.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_single_pack_transfer"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.single_pack_transfer.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_zone_picking"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.zone_picking.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_location_content_transfer"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.location_content_transfer.esm.js?v=#{mod_version}"
-                type="module"
-            />
-            <script
-                id="script_demo_components"
-                t-attf-src="/shopfloor_mobile/static/wms/src/demo/demo.components.esm.js?v=#{mod_version}"
-                type="module"
-            />
+            <script id="script_demo_checkout" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.checkout.esm.js";
+            </script>
+            <script id="script_demo_cluster_picking" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.cluster_picking.esm.js";
+            </script>
+            <script id="script_demo_delivery" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.delivery.esm.js";
+            </script>
+            <script id="script_demo_single_pack_transfer" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.single_pack_transfer.esm.js";
+            </script>
+            <script id="script_demo_zone_picking" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.zone_picking.esm.js";
+            </script>
+            <script id="script_demo_location_content_transfer" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.location_content_transfer.esm.js";
+            </script>
+            <script id="script_demo_components" type="module">
+                import "/shopfloor_mobile/static/wms/src/demo/demo.components.esm.js";
+            </script>
         </xpath>
     </template>
 </odoo>
