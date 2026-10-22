@@ -23,8 +23,7 @@ const Reception = {
             />
             <date-picker-input
                 v-if="state_is('set_lot')"
-                :handler_to_update_date="get_expiration_date_from_lot"
-                v-on:date_picker_selected="state.on_date_picker_selected"
+                v-on:dateChange="state.on_date_picker_selected"
             />
             <template v-if="state_is('select_move')">
                 <item-detail-card
